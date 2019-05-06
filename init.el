@@ -21,7 +21,7 @@
 
 ;; Should set before loading `use-package'
 (eval-and-compile
-  (setq use-package-always-ensure t)
+  ;;Don't use (setq use-package-always-ensure t). It prevents customising build in packages.
   (setq use-package-always-defer t)
   (setq use-package-expand-minimally t)
   (setq use-package-enable-imenu-support t))
@@ -44,9 +44,112 @@
   (x-gtk-use-system-tooltips nil)
   (enable-recursive-minibuffers t "Allow minibuffer commands in the minibuffer")
   (indent-tabs-mode nil "Spaces!")
-  (hl-line-mode t "Higlight the current line")
   (debug-on-quit nil))
 ;; Common:1 ends here
+
+;; [[file:~/.emacs.d/init.org::*Other%20built%20in%20settings][Other built in settings:1]]
+(use-package ibuffer
+  :bind([remap list-buffers] . ibuffer))
+;; Other built in settings:1 ends here
+
+;; [[file:~/.emacs.d/init.org::*Highlighting][Highlighting:1]]
+(use-package paren
+  :config
+  (show-paren-mode t))
+
+(use-package hl-line
+  :hook
+  (prog-mode . hl-line-mode))
+
+(use-package highlight-numbers
+  :ensure t
+  :hook
+  (prog-mode . highlight-numbers-mode))
+
+(use-package highlight-escape-sequences
+  :ensure t
+  :config (hes-mode))
+
+(use-package hl-todo
+  :ensure t
+  :hook
+  (prog-mode . hl-todo-mode))
+
+(use-package rainbow-delimiters
+  :ensure t
+  :hook
+  (prog-mode . rainbow-delimiters-mode))
+
+(use-package rainbow-mode
+  :ensure t
+  :diminish
+  :hook prog-mode)
+;; Highlighting:1 ends here
+
+;; [[file:~/.emacs.d/init.org::*Files][Files:2]]
+(use-package recentf
+  :custom
+  (recentf-auto-cleanup 30)
+  :config
+  (run-with-idle-timer 30 t 'recentf-save-list))
+;; Files:2 ends here
+
+;; [[file:~/.emacs.d/init.org::*Files][Files:3]]
+(use-package cus-edit
+  :custom
+  (custom-file null-device "Don't store customizations"))
+;; Files:3 ends here
+
+;; [[file:~/.emacs.d/init.org::*Localization][Localization:1]]
+(use-package mule
+  :config
+  (prefer-coding-system 'utf-8)
+  (set-language-environment "UTF-8")
+  (set-terminal-coding-system 'utf-8))
+;; Localization:1 ends here
+
+;; [[file:~/.emacs.d/init.org::*Fonts][Fonts:1]]
+(use-package faces
+  :defer 0.1
+  :custom
+  (face-font-family-alternatives '(("Source Code Pro")))
+  :config
+  (set-face-attribute 'default
+                      nil
+                      :family (caar face-font-family-alternatives)
+                      :weight 'regular
+                      :width 'semi-condensed
+                      :height 120))
+;; Fonts:1 ends here
+
+;; [[file:~/.emacs.d/init.org::*GUI][GUI:1]]
+(use-package tool-bar
+  :config
+  (tool-bar-mode -1))
+
+(use-package menu-bar
+  :config
+  (menu-bar-mode -1))
+
+(use-package scroll-bar
+  :config
+  (scroll-bar-mode -1))
+
+(use-package tooltip
+  :defer t
+  :custom
+  (tooltip-mode -1))
+;; GUI:1 ends here
+
+;; [[file:~/.emacs.d/init.org::*Theme][Theme:1]]
+;;  (use-package doom-themes
+ ;;    :hook
+ ;;    (after-init . doom-themes-org-config)
+ ;;    :config
+ ;;    (doom-themes-org-config)
+ ;;    (load-theme 'wombat))
+(load-theme 'wombat)
+;; Theme:1 ends here
 
 ;; [[file:~/.emacs.d/init.org::*Some%20fancy%20gadgets%20for%20graphics][Some fancy gadgets for graphics:1]]
 (use-package time
@@ -104,15 +207,6 @@
   (doom-modeline-icon t))
 ;; Modeline:1 ends here
 
-;; [[file:~/.emacs.d/init.org::*Theme][Theme:1]]
-(use-package doom-themes
-  :hook
-  (after-init . doom-themes-org-config)
-  :config
-  (doom-themes-org-config)
-  (load-theme 'wombat))
-;; Theme:1 ends here
-
 ;; [[file:~/.emacs.d/init.org::*Dashboard][Dashboard:1]]
 (use-package dashboard
   :ensure t
@@ -135,6 +229,22 @@
   :config
   (which-key-mode))
 ;; Which-key:1 ends here
+
+;; [[file:~/.emacs.d/init.org::*Company%20mode][Company mode:1]]
+(use-package company
+  :defer 3
+  :ensure t
+  :diminish
+  :commands (company-mode company-indent-or-complete-common)
+  :init
+  (dolist (hook '(emacs-lisp-mode-hook))
+    (add-hook hook
+              #'(lambda ()
+                  (local-set-key (kbd "<tab>")
+                                 #'company-indent-or-complete-common))))
+  :config
+  (global-company-mode 1))
+;; Company mode:1 ends here
 
 ;; [[file:~/.emacs.d/init.org::*Ivy][Ivy:1]]
 (use-package ivy
@@ -174,6 +284,7 @@
 ;; [[file:~/.emacs.d/init.org::*Counsel][Counsel:1]]
 (use-package counsel
   :after ivy
+  :ensure t
   :demand t
   :custom (counsel-find-file-ignore-regexp
            (concat "\\(\\`\\.[^.]\\|"
@@ -182,11 +293,11 @@
   :diminish
   :bind
   (("C-*"     . counsel-org-agenda-headlines)
-   ("C-x C-f" . counsel-finf-file)
+   ("C-x C-f" . counsel-find-file)
    ("C-c e l" . counsel-find-library)
    ("C-c e q" . counsel-set-variable)
    ("C-h f"   . counsel-describe-function)
-   ("c-h v"   . counsel-describe-variable)
+   ("C-h v"   . counsel-describe-variable)
    ("C-x r b" . counsel-describe-bookmark)
    ("M-x"     . counsel-M-x)
    ("M-s f"   . counsel-file-jump)
@@ -204,6 +315,8 @@
   :ensure t
   :after ivy
   :bind
+  ("C-s"  . swiper)
+  :bind
   (:map swiper-map
         ("M-y" . yank)
         ("M-%" . swiper-query-replace)
@@ -216,6 +329,8 @@
 
 ;; [[file:~/.emacs.d/init.org::*Magit][Magit:1]]
 (use-package magit
+  :ensure t
+  :hook (magit-mode  . hl-line-mode)
   :bind
   (("C-x g"  . magit-status)
    ("C-x G"  . magit-status-with-prefix)))

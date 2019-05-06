@@ -25,7 +25,7 @@
 
   ;; Should set before loading `use-package'
   (eval-and-compile
-    (setq use-package-always-ensure t)
+    ;;Don't use (setq use-package-always-ensure t). It prevents customising build in packages.
     (setq use-package-always-defer t)
     (setq use-package-expand-minimally t)
     (setq use-package-enable-imenu-support t))
@@ -51,10 +51,144 @@ These have been defined in C code, so use -emacs- pseudo-package to set them
     (x-gtk-use-system-tooltips nil)
     (enable-recursive-minibuffers t "Allow minibuffer commands in the minibuffer")
     (indent-tabs-mode nil "Spaces!")
-    (hl-line-mode t "Higlight the current line")
     (debug-on-quit nil))
 #+END_SRC
+** Other built in settings
+#+BEGIN_SRC emacs-lisp
+  (use-package ibuffer
+    :bind([remap list-buffers] . ibuffer))
+#+END_SRC
+** Highlighting
+#+BEGIN_SRC emacs-lisp
+  (use-package paren
+    :config
+    (show-paren-mode t))
+
+  (use-package hl-line
+    :hook
+    (prog-mode . hl-line-mode))
+
+  (use-package highlight-numbers
+    :ensure t
+    :hook
+    (prog-mode . highlight-numbers-mode))
+
+  (use-package highlight-escape-sequences
+    :ensure t
+    :config (hes-mode))
+
+  (use-package hl-todo
+    :ensure t
+    :hook
+    (prog-mode . hl-todo-mode))
+
+  (use-package rainbow-delimiters
+    :ensure t
+    :hook
+    (prog-mode . rainbow-delimiters-mode))
+
+  (use-package rainbow-mode
+    :ensure t
+    :diminish
+    :hook prog-mode)
+#+END_SRC
+** Files
+Saving files
+#+BEGIN_SRC emacs-lisp :tangle no
+  (use-package files
+    :hook
+    (before-save .delete-trailing-whitespace)
+    :custom
+    (require-final-newline t)
+    ;; backup settings
+    (make-backup-files t)
+    (backup-by-copying t)
+    (backup-directory-alist
+     '(("." . ,(expand-file-name
+                 (concat user-emacs-directory ".backups")))))
+    (delete-old-versions t)
+    (delete-by-moving-to-trash t)
+    (kept-new-version 5)
+    (kept-old-versions 2)
+    (auto-save-default t)
+    (auto-save-interval 200)
+    (version-control t))
+#+END_SRC
+
+Recent files
+#+BEGIN_SRC emacs-lisp
+  (use-package recentf
+    :custom
+    (recentf-auto-cleanup 30)
+    :config
+    (run-with-idle-timer 30 t 'recentf-save-list))
+#+END_SRC
+
+Build in Customize
+#+BEGIN_SRC emacs-lisp
+  (use-package cus-edit
+    :custom
+    (custom-file null-device "Don't store customizations"))
+#+END_SRC
+
 * User Interface
+** Localization
+#+BEGIN_SRC emacs-lisp
+  (use-package mule
+    :config
+    (prefer-coding-system 'utf-8)
+    (set-language-environment "UTF-8")
+    (set-terminal-coding-system 'utf-8))
+#+END_SRC
+
+** Fonts
+#+BEGIN_SRC emacs-lisp
+  (use-package faces
+    :defer 0.1
+    :custom
+    (face-font-family-alternatives '(("Source Code Pro")))
+    :config
+    (set-face-attribute 'default
+                        nil
+                        :family (caar face-font-family-alternatives)
+                        :weight 'regular
+                        :width 'semi-condensed
+                        :height 120))
+#+END_SRC
+
+** GUI
+Disable gui elements we likely ever use
+#+BEGIN_SRC emacs-lisp
+  (use-package tool-bar
+    :config
+    (tool-bar-mode -1))
+
+  (use-package menu-bar
+    :config
+    (menu-bar-mode -1))
+
+  (use-package scroll-bar
+    :config
+    (scroll-bar-mode -1))
+
+  (use-package tooltip
+    :defer t
+    :custom
+    (tooltip-mode -1))
+
+#+END_SRC
+** Theme
+Like the build in theme of wombat. Good vibrance of colours and not too dark.
+ #+BEGIN_SRC emacs-lisp
+ ;;  (use-package doom-themes
+ ;;    :hook
+ ;;    (after-init . doom-themes-org-config)
+ ;;    :config
+ ;;    (doom-themes-org-config)
+ ;;    (load-theme 'wombat))
+(load-theme 'wombat)
+ #+END_SRC
+
 ** Some fancy gadgets for graphics
  #+BEGIN_SRC emacs-lisp
    (use-package time
@@ -114,17 +248,6 @@ The nicest out there at the moment is doom-modeline.
      (doom-modeline-icon t))
  #+END_SRC
 
-** Theme
-Like the build in theme of wombat. Good vibrance of colours and not too dark.
- #+BEGIN_SRC emacs-lisp
-   (use-package doom-themes
-     :hook
-     (after-init . doom-themes-org-config)
-     :config
-     (doom-themes-org-config)
-     (load-theme 'wombat))
- #+END_SRC
-
 ** Dashboard
 #+BEGIN_SRC emacs-lisp
   (use-package dashboard
@@ -139,6 +262,7 @@ Like the build in theme of wombat. Good vibrance of colours and not too dark.
                        (agenda . 5)
                        (registers . 5))))
 #+END_SRC
+
 * Help
 Some tools that help explaining what is available, etc
 ** Which-key
@@ -151,6 +275,24 @@ Perfect tool to tell what key sequences are defined after starting our key seque
     :config
     (which-key-mode))
 #+END_SRC
+** Company mode
+Auto completion
+#+BEGIN_SRC emacs-lisp
+  (use-package company
+    :defer 3
+    :ensure t
+    :diminish
+    :commands (company-mode company-indent-or-complete-common)
+    :init
+    (dolist (hook '(emacs-lisp-mode-hook))
+      (add-hook hook
+                #'(lambda ()
+                    (local-set-key (kbd "<tab>")
+                                   #'company-indent-or-complete-common))))
+    :config
+    (global-company-mode 1))
+#+END_SRC
+
 * Search, Narrow and Minibuffers
 Best combination of search and narrowing software is Ivy|Counsel and Swiper.
 It can do everything Helm can do, is however much smaller in footprint.
@@ -195,6 +337,7 @@ Ivy is a generic completion mechanism for Emacs.
 #+BEGIN_SRC emacs-lisp
   (use-package counsel
     :after ivy
+    :ensure t
     :demand t
     :custom (counsel-find-file-ignore-regexp
              (concat "\\(\\`\\.[^.]\\|"
@@ -203,11 +346,11 @@ Ivy is a generic completion mechanism for Emacs.
     :diminish
     :bind
     (("C-*"     . counsel-org-agenda-headlines)
-     ("C-x C-f" . counsel-finf-file)
+     ("C-x C-f" . counsel-find-file)
      ("C-c e l" . counsel-find-library)
      ("C-c e q" . counsel-set-variable)
      ("C-h f"   . counsel-describe-function)
-     ("c-h v"   . counsel-describe-variable)
+     ("C-h v"   . counsel-describe-variable)
      ("C-x r b" . counsel-describe-bookmark)
      ("M-x"     . counsel-M-x)
      ("M-s f"   . counsel-file-jump)
@@ -226,6 +369,8 @@ Find text in your buffer, but cleverly.
     :ensure t
     :after ivy
     :bind
+    ("C-s"  . swiper)
+    :bind
     (:map swiper-map
           ("M-y" . yank)
           ("M-%" . swiper-query-replace)
@@ -235,17 +380,20 @@ Find text in your buffer, but cleverly.
     (:map isearch-mode-map
          ("C-o" . swiper-from-isearch)))
 #+END_SRC
+
 * Version control
 One of the main advantages of emacs is everything is text based.
 This call for version control using git. Magit is the tool to take advantage of both.
 ** Magit
 #+BEGIN_SRC emacs-lisp
   (use-package magit
+    :ensure t
+    :hook (magit-mode  . hl-line-mode)
     :bind
     (("C-x g"  . magit-status)
      ("C-x G"  . magit-status-with-prefix)))
 #+END_SRC
-* The end
+* The End
 # Local Variables:
 # eval: (add-hook 'after-save-hook (lambda () (org-babel-tangle)(byte-compile-file "~/.emacs.d/init.el")) nil t)
 # End:

@@ -36,6 +36,25 @@
     (require 'use-package))
 #+END_SRC
 
+** Use-package configuration
+Now that se-package is installed, extend its' functionality
+#+BEGIN_SRC emacs-lisp
+  (use-package system-packages
+    :ensure t
+    :custom
+    (system-packages-noconfirm t))
+
+  (use-package use-package-ensure-system-package
+    :ensure t)
+
+  ;; diminish keyword
+  (use-package diminish
+    :ensure t)
+
+  ;; bind keyword
+  (use-package bind-key
+    :ensure t)
+#+END_SRC
 * Global Defaults
 ** Common
 These have been defined in C code, so use -emacs- pseudo-package to set them
@@ -92,12 +111,13 @@ These have been defined in C code, so use -emacs- pseudo-package to set them
     :diminish
     :hook prog-mode)
 #+END_SRC
-** Files
-Saving files
+** TODO Files
+Saving file
+Conflicts with magit. Confused about backup folder
 #+BEGIN_SRC emacs-lisp :tangle no
   (use-package files
     :hook
-    (before-save .delete-trailing-whitespace)
+    (before-save . delete-trailing-whitespace)
     :custom
     (require-final-newline t)
     ;; backup settings
@@ -124,11 +144,15 @@ Recent files
     (run-with-idle-timer 30 t 'recentf-save-list))
 #+END_SRC
 
-Build in Customize
+Customize to a sperate file
 #+BEGIN_SRC emacs-lisp
   (use-package cus-edit
     :custom
-    (custom-file null-device "Don't store customizations"))
+    ;;(custom-file null-device "Don't store customizations"))
+    (custom-file (expand-file-name ".custom.el" user-emacs-directory) "Store customizations in seperate file"))
+
+  (when (file-exists-p custom-file)
+    (load custom-file))
 #+END_SRC
 
 * User Interface
@@ -180,13 +204,12 @@ Disable gui elements we likely ever use
 ** Theme
 Like the build in theme of wombat. Good vibrance of colours and not too dark.
  #+BEGIN_SRC emacs-lisp
- ;;  (use-package doom-themes
- ;;    :hook
- ;;    (after-init . doom-themes-org-config)
- ;;    :config
- ;;    (doom-themes-org-config)
- ;;    (load-theme 'wombat))
-(load-theme 'wombat)
+   (use-package darktooth-theme
+     :ensure t
+     :demand t
+     :config
+     (load-theme 'darktooth))
+   ;;(load-theme 'wombat)
  #+END_SRC
 
 ** Some fancy gadgets for graphics
@@ -236,7 +259,7 @@ Like the build in theme of wombat. Good vibrance of colours and not too dark.
  #+END_SRC
 
 ** Modeline
-The nicest out there at the moment is doom-modeline. 
+The nicest out there at the moment is doom-modeline.
  #+BEGIN_SRC emacs-lisp
    (use-package doom-modeline
      :ensure t
@@ -269,6 +292,7 @@ Some tools that help explaining what is available, etc
 Perfect tool to tell what key sequences are defined after starting our key sequence.
 #+BEGIN_SRC emacs-lisp
   (use-package which-key
+    :ensure t
     :defer 3
     :diminish
     :commands which-key-mode
@@ -297,7 +321,7 @@ Auto completion
 Best combination of search and narrowing software is Ivy|Counsel and Swiper.
 It can do everything Helm can do, is however much smaller in footprint.
 ** Ivy
-Ivy provides an interface to list, search, filter and perform actions on a collection of "things". These "things" can range from strings to buffers, Ivy doesn't really care. It just provides a way for the user to interact with this collection. 
+Ivy provides an interface to list, search, filter and perform actions on a collection of "things". These "things" can range from strings to buffers, Ivy doesn't really care. It just provides a way for the user to interact with this collection.
 Ivy is a generic completion mechanism for Emacs.
 #+BEGIN_SRC emacs-lisp
   (use-package ivy
@@ -333,34 +357,49 @@ Ivy is a generic completion mechanism for Emacs.
     (ivy-mode 1)
     (ivy-set-occur 'ivy-switch-buffer 'ivy-switch-buffer-occur))
 #+END_SRC
+
 ** Counsel
+Counsel functions to be found under C-c c {counsel} a -> counsel-appropose
 #+BEGIN_SRC emacs-lisp
-  (use-package counsel
-    :after ivy
-    :ensure t
-    :demand t
-    :custom (counsel-find-file-ignore-regexp
-             (concat "\\(\\`\\.[^.]\\|"
-                     (regexp-opt completion-ignored-extensions)
-                     "\\'\\)"))
-    :diminish
-    :bind
-    (("C-*"     . counsel-org-agenda-headlines)
-     ("C-x C-f" . counsel-find-file)
-     ("C-c e l" . counsel-find-library)
-     ("C-c e q" . counsel-set-variable)
-     ("C-h f"   . counsel-describe-function)
-     ("C-h v"   . counsel-describe-variable)
-     ("C-x r b" . counsel-describe-bookmark)
-     ("M-x"     . counsel-M-x)
-     ("M-s f"   . counsel-file-jump)
-     ("M-s j"   . counsel-dired-jump))
-    :commands counsel-minibuffer-history
-    :init
-    (bind-key "M-r" #'counsel-minibuffer-history minibuffer-local-map)
-    :config
-    (add-to-list 'ivy-sort-matches-functions-alist
-                 '(counsel-find-file. ivy-sort-files-by-date)))
+(use-package counsel
+  :ensure t
+  :bind
+  (([remap menu-bar-open] . counsel-tmm)
+   ([remap insert-char] . counsel-unicode-char)
+   ([remap isearch-forward] . counsel-grep-or-swiper)
+   :map mode-specific-map
+   :prefix-map counsel-prefix-map
+   :prefix "c"
+   ("a" . counsel-apropos)
+   ("b" . counsel-bookmark)
+   ("B" . counsel-bookmarked-directory)
+   ("c w" . counsel-colors-web)
+   ("c e" . counsel-colors-emacs)
+   ("d" . counsel-dired-jump)
+   ("f" . counsel-file-jump)
+   ("F" . counsel-faces)
+   ("g" . counsel-org-goto)
+   ("h" . counsel-command-history)
+   ("H" . counsel-minibuffer-history)
+   ("i" . counsel-imenu)
+   ("j" . counsel-find-symbol)
+   ("l" . counsel-locate)
+   ("L" . counsel-find-library)
+   ("m" . counsel-mark-ring)
+   ("o" . counsel-outline)
+   ("O" . counsel-find-file-extern)
+   ("p" . counsel-package)
+   ("r" . counsel-recentf)
+   ("s g" . counsel-grep)
+   ("s r" . counsel-rg)
+   ("s s" . counsel-ag)
+   ("t" . counsel-org-tag)
+   ("v" . counsel-set-variable)
+   ("w" . counsel-wmctrl)
+   :map help-map
+   ("F" . counsel-describe-face))
+  :init
+  (counsel-mode))
 #+END_SRC
 ** Swiper
 Find text in your buffer, but cleverly.
@@ -394,6 +433,7 @@ This call for version control using git. Magit is the tool to take advantage of 
      ("C-x G"  . magit-status-with-prefix)))
 #+END_SRC
 * The End
+;;; # eval: (add-hook 'after-save-hook (lambda () (org-babel-tangle)(byte-compile-file "~/.emacs.d/init.el")) nil t)
 # Local Variables:
-# eval: (add-hook 'after-save-hook (lambda () (org-babel-tangle)(byte-compile-file "~/.emacs.d/init.el")) nil t)
+# eval: (add-hook 'after-save-hook (lambda () (org-babel-tangle)) nil t)
 # End:

@@ -32,6 +32,24 @@
   (require 'use-package))
 ;; Use-package install:1 ends here
 
+;; [[file:~/.emacs.d/init.org::*Use-package%20configuration][Use-package configuration:1]]
+(use-package system-packages
+  :ensure t
+  :custom
+  (system-packages-noconfirm t))
+
+(use-package use-package-ensure-system-package
+  :ensure t)
+
+;; diminish keyword
+(use-package diminish
+  :ensure t)
+
+;; bind keyword
+(use-package bind-key
+  :ensure t)
+;; Use-package configuration:1 ends here
+
 ;; [[file:~/.emacs.d/init.org::*Common][Common:1]]
 (use-package emacs
   :init
@@ -97,7 +115,11 @@
 ;; [[file:~/.emacs.d/init.org::*Files][Files:3]]
 (use-package cus-edit
   :custom
-  (custom-file null-device "Don't store customizations"))
+  ;;(custom-file null-device "Don't store customizations"))
+  (custom-file (expand-file-name ".custom.el" user-emacs-directory) "Store customizations in seperate file"))
+
+(when (file-exists-p custom-file)
+  (load custom-file))
 ;; Files:3 ends here
 
 ;; [[file:~/.emacs.d/init.org::*Localization][Localization:1]]
@@ -142,13 +164,12 @@
 ;; GUI:1 ends here
 
 ;; [[file:~/.emacs.d/init.org::*Theme][Theme:1]]
-;;  (use-package doom-themes
- ;;    :hook
- ;;    (after-init . doom-themes-org-config)
- ;;    :config
- ;;    (doom-themes-org-config)
- ;;    (load-theme 'wombat))
-(load-theme 'wombat)
+(use-package darktooth-theme
+  :ensure t
+  :demand t
+  :config
+  (load-theme 'darktooth))
+;;(load-theme 'wombat)
 ;; Theme:1 ends here
 
 ;; [[file:~/.emacs.d/init.org::*Some%20fancy%20gadgets%20for%20graphics][Some fancy gadgets for graphics:1]]
@@ -223,6 +244,7 @@
 
 ;; [[file:~/.emacs.d/init.org::*Which-key][Which-key:1]]
 (use-package which-key
+  :ensure t
   :defer 3
   :diminish
   :commands which-key-mode
@@ -283,31 +305,44 @@
 
 ;; [[file:~/.emacs.d/init.org::*Counsel][Counsel:1]]
 (use-package counsel
-  :after ivy
   :ensure t
-  :demand t
-  :custom (counsel-find-file-ignore-regexp
-           (concat "\\(\\`\\.[^.]\\|"
-                   (regexp-opt completion-ignored-extensions)
-                   "\\'\\)"))
-  :diminish
   :bind
-  (("C-*"     . counsel-org-agenda-headlines)
-   ("C-x C-f" . counsel-find-file)
-   ("C-c e l" . counsel-find-library)
-   ("C-c e q" . counsel-set-variable)
-   ("C-h f"   . counsel-describe-function)
-   ("C-h v"   . counsel-describe-variable)
-   ("C-x r b" . counsel-describe-bookmark)
-   ("M-x"     . counsel-M-x)
-   ("M-s f"   . counsel-file-jump)
-   ("M-s j"   . counsel-dired-jump))
-  :commands counsel-minibuffer-history
+  (([remap menu-bar-open] . counsel-tmm)
+   ([remap insert-char] . counsel-unicode-char)
+   ([remap isearch-forward] . counsel-grep-or-swiper)
+   :map mode-specific-map
+   :prefix-map counsel-prefix-map
+   :prefix "c"
+   ("a" . counsel-apropos)
+   ("b" . counsel-bookmark)
+   ("B" . counsel-bookmarked-directory)
+   ("c w" . counsel-colors-web)
+   ("c e" . counsel-colors-emacs)
+   ("d" . counsel-dired-jump)
+   ("f" . counsel-file-jump)
+   ("F" . counsel-faces)
+   ("g" . counsel-org-goto)
+   ("h" . counsel-command-history)
+   ("H" . counsel-minibuffer-history)
+   ("i" . counsel-imenu)
+   ("j" . counsel-find-symbol)
+   ("l" . counsel-locate)
+   ("L" . counsel-find-library)
+   ("m" . counsel-mark-ring)
+   ("o" . counsel-outline)
+   ("O" . counsel-find-file-extern)
+   ("p" . counsel-package)
+   ("r" . counsel-recentf)
+   ("s g" . counsel-grep)
+   ("s r" . counsel-rg)
+   ("s s" . counsel-ag)
+   ("t" . counsel-org-tag)
+   ("v" . counsel-set-variable)
+   ("w" . counsel-wmctrl)
+   :map help-map
+   ("F" . counsel-describe-face))
   :init
-  (bind-key "M-r" #'counsel-minibuffer-history minibuffer-local-map)
-  :config
-  (add-to-list 'ivy-sort-matches-functions-alist
-               '(counsel-find-file. ivy-sort-files-by-date)))
+  (counsel-mode))
 ;; Counsel:1 ends here
 
 ;; [[file:~/.emacs.d/init.org::*Swiper][Swiper:1]]

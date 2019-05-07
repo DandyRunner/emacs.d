@@ -2,9 +2,10 @@
 (eval-when-compile
   (require 'package)
   (setq package-archives
-	`(("melpa" . ,(concat "/home/ejansen/" ".elpa-mirror/melpa/"))
-	  ("org"   . ,(concat "/home/ejansen/" ".elpa-mirror/org/"))
-	  ("gnu"   . ,(concat "/home/ejansen/" ".elpa-mirror/gnu/")))))
+	`(("melpa"        . ,(concat "/home/ejansen/" ".elpa-mirror/melpa/"))
+	  ("org"          . ,(concat "/home/ejansen/" ".elpa-mirror/org/"))
+	  ("melba-stable" . ,(concat "/home/ejansen/" ".elpa-mirror/melpa-stable/"))
+	  ("gnu"          . ,(concat "/home/ejansen/" ".elpa-mirror/gnu/")))))
 ;; Package sources:1 ends here
 
 ;; [[file:~/.emacs.d/init.org::*Use-package%20install][Use-package install:1]]
@@ -122,6 +123,52 @@
   (load custom-file))
 ;; Files:3 ends here
 
+;; [[file:~/.emacs.d/init.org::*Elmacro][Elmacro:1]]
+(use-package macrostep
+  :ensure t
+  :bind
+  (("C-c e m" . macrostep-expand)))
+;; Elmacro:1 ends here
+
+;; [[file:~/.emacs.d/init.org::*Expand%20Region][Expand Region:1]]
+(use-package expand-region
+  :ensure t
+  :bind
+  (("C-=" . er/expand-region)
+   ("C--" . er/contract-region)
+   :map mode-specific-map
+   :prefix-map region-prefix-map
+   :prefix "r"
+   ("(" . er/mark-inside-pairs)
+   (")" . er/mark-outside-pairs)
+   ("'" . er/mark-inside-quotes)
+   ([34] . er/mark-outside-quotes) ; it's just a quotation mark
+   ("o" . er/mark-org-parent)
+   ("u" . er/mark-url)
+   ("b" . er/mark-org-code-block)
+   ("." . er/mark-method-call)
+   (">" . er/mark-next-accessor)
+   ("w" . er/mark-word)
+   ("d" . er/mark-defun)
+   ("e" . er/mark-email)
+   ("," . er/mark-symbol)
+   ("<" . er/mark-symbol-with-prefix)
+   (";" . er/mark-comment)
+   ("s" . er/mark-sentence)
+   ("S" . er/mark-text-sentence)
+   ("p" . er/mark-paragraph)
+   ("P" . er/mark-text-paragraph)))
+;; Expand Region:1 ends here
+
+;; [[file:~/.emacs.d/init.org::*Expand%20Region][Expand Region:2]]
+(use-package edit-indirect
+  :ensure t
+  :after expand-region
+  :bind
+  (:map region-prefix-map
+        ("r" . edit-indirect-region)))
+;; Expand Region:2 ends here
+
 ;; [[file:~/.emacs.d/init.org::*Localization][Localization:1]]
 (use-package mule
   :config
@@ -162,15 +209,6 @@
   :custom
   (tooltip-mode -1))
 ;; GUI:1 ends here
-
-;; [[file:~/.emacs.d/init.org::*Theme][Theme:1]]
-(use-package darktooth-theme
-  :ensure t
-  :demand t
-  :config
-  (load-theme 'darktooth))
-;;(load-theme 'wombat)
-;; Theme:1 ends here
 
 ;; [[file:~/.emacs.d/init.org::*Some%20fancy%20gadgets%20for%20graphics][Some fancy gadgets for graphics:1]]
 (use-package time
@@ -228,18 +266,23 @@
   (doom-modeline-icon t))
 ;; Modeline:1 ends here
 
+;; [[file:~/.emacs.d/init.org::*Theme][Theme:1]]
+(load-theme 'wombat)
+;; Theme:1 ends here
+
 ;; [[file:~/.emacs.d/init.org::*Dashboard][Dashboard:1]]
 (use-package dashboard
   :ensure t
+  :diminish dashboard-mode
   :config
   (dashboard-setup-startup-hook)
   :custom
-  (initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
+  (initial-buffer-choice (lambda () (get-buffer-create "*dashboard*")))
   (dashboard-items '((recents  . 5)
                      (bookmarks . 5)
-                     (projects . 5)
-                     (agenda . 5)
-                     (registers . 5))))
+                  ;;   (projects . 5)
+                     (agenda . 5))))
+                  ;;   (registers . 5))))
 ;; Dashboard:1 ends here
 
 ;; [[file:~/.emacs.d/init.org::*Which-key][Which-key:1]]
@@ -267,6 +310,17 @@
   :config
   (global-company-mode 1))
 ;; Company mode:1 ends here
+
+;; [[file:~/.emacs.d/init.org::*Helpful][Helpful:1]]
+(use-package helpful
+  :ensure t
+  :bind
+  (("C-h f" . helpful-callable)
+   ("C-h v" . helpful-variable)
+   ("C-h k" . helpful-key)
+   ("C-h C" . helpful-command)
+   ("C-h F" . helpful-function)))
+;; Helpful:1 ends here
 
 ;; [[file:~/.emacs.d/init.org::*Ivy][Ivy:1]]
 (use-package ivy
@@ -368,5 +422,113 @@
   :hook (magit-mode  . hl-line-mode)
   :bind
   (("C-x g"  . magit-status)
-   ("C-x G"  . magit-status-with-prefix)))
+   ("C-x G"  . magit-status-with-prefix))
+  :bind
+  (:map mode-specific-map
+        :prefix-map magit-prefix-map
+        :prefix "m"
+        (("a" . magit-stage-file) ; the closest analog to git add
+         ("b" . magit-blame)
+         ("B" . magit-branch)
+         ("c" . magit-checkout)
+         ("C" . magit-commit)
+         ("d" . magit-diff)
+         ("D" . magit-discard)
+         ("f" . magit-fetch)
+         ("g" . vc-git-grep)
+         ("G" . magit-gitignore)
+         ("i" . magit-init)
+         ("l" . magit-log)
+         ("m" . magit)
+         ("M" . magit-merge)
+         ("n" . magit-notes-edit)
+         ("p" . magit-pull-branch)
+         ("P" . magit-push-current)
+         ("r" . magit-reset)
+         ("R" . magit-rebase)
+         ("s" . magit-status)
+         ("S" . magit-stash)
+         ("t" . magit-tag)
+         ("T" . magit-tag-delete)
+         ("u" . magit-unstage)
+         ("U" . magit-update-index))))
 ;; Magit:1 ends here
+
+;; [[file:~/.emacs.d/init.org::*IBuffer-vc][IBuffer-vc:1]]
+(use-package ibuffer-vc
+  :ensure t
+  :config
+  (define-ibuffer-column icon
+    (:name "Icon" :inline t)
+    (all-the-icons-ivy--icon-for-mode major-mode))
+  :custom
+  (ibuffer-formats
+   '((mark modified read-only vc-status-mini " "
+           (name 18 18 :left :elide)
+           " "
+           (size 9 -1 :right)
+           " "
+           (mode 16 16 :left :elide)
+           " "
+           filename-and-process)) "include vc status info")
+  :hook
+  (ibuffer . (lambda ()
+               (ibuffer-vc-set-filter-groups-by-vc-root)
+               (unless (eq ibuffer-sorting-mode 'alphabetic)
+                 (ibuffer-do-sort-by-alphabetic)))))
+;; IBuffer-vc:1 ends here
+
+;; [[file:~/.emacs.d/init.org::*Git%20modes][Git modes:1]]
+(use-package gitconfig-mode
+  :ensure t
+  :defer t)
+
+(use-package gitignore-mode
+  :ensure t
+  :defer t)
+;; Git modes:1 ends here
+
+;; [[file:~/.emacs.d/init.org::*Diff-hl][Diff-hl:1]]
+(use-package diff-hl
+  :ensure t
+  :hook
+  ((magit-post-refresh . diff-hl-post-refresh)
+   (prog-mode . diff-hl-mode)
+   (org-mode . diff-hl-mode)
+   (dired-mode . diff-hl-dired-mode)))
+;; Diff-hl:1 ends here
+
+;; [[file:~/.emacs.d/init.org::*Paredit][Paredit:1]]
+(use-package paredit
+  :ensure t
+  :diminish paredit-mode
+  :commands (paredit-mode)
+  :hook ((lisp-mode emacs-lisp-mode) . paredit-mode))
+;; Paredit:1 ends here
+
+;; [[file:~/.emacs.d/init.org::*Smart%20Commenting][Smart Commenting:1]]
+(use-package smart-comment
+  :ensure t
+  :bind
+  ("M-;" . smart-comment))
+;; Smart Commenting:1 ends here
+
+;; [[file:~/.emacs.d/init.org::*Projectile][Projectile:1]]
+(use-package projectile
+  :ensure t
+  :bind
+  (:map mode-specific-map ("p" . projectile-command-map))
+  :custom
+  (projectile-project-root-files-functions
+   '(projectile-root-local
+     projectile-root-top-down
+     projectile-root-bottom-up
+     projectile-root-top-down-recurring))
+  (projectile-completion-system 'ivy))
+
+(use-package counsel-projectile
+  :ensure t
+  :after counsel prokectile
+  :config
+  (counsel-projectile-mode))
+;; Projectile:1 ends here

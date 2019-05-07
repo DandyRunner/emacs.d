@@ -5,9 +5,10 @@
 (eval-when-compile
   (require 'package)
   (setq package-archives
-	`(("melpa" . ,(concat "/home/ejansen/" ".elpa-mirror/melpa/"))
-	  ("org"   . ,(concat "/home/ejansen/" ".elpa-mirror/org/"))
-	  ("gnu"   . ,(concat "/home/ejansen/" ".elpa-mirror/gnu/")))))
+	`(("melpa"        . ,(concat "/home/ejansen/" ".elpa-mirror/melpa/"))
+	  ("org"          . ,(concat "/home/ejansen/" ".elpa-mirror/org/"))
+	  ("melba-stable" . ,(concat "/home/ejansen/" ".elpa-mirror/melpa-stable/"))
+	  ("gnu"          . ,(concat "/home/ejansen/" ".elpa-mirror/gnu/")))))
 #+END_SRC
 
 ** Use-package install
@@ -154,7 +155,61 @@ Customize to a sperate file
   (when (file-exists-p custom-file)
     (load custom-file))
 #+END_SRC
+* Global Totals
+** Elmacro
+Super handy tool to look at how macro's expand.
+For example the use-package macro expands in how packages are loaded
+- Expand with C-c e m
+- Collapse with u or backspace
+#+BEGIN_SRC emacs-lisp
+  (use-package macrostep
+    :ensure t
+    :bind
+    (("C-c e m" . macrostep-expand)))
+#+END_SRC
+** Expand Region
+Expand the region of selection.
+- Start using C-+ to expand ro C-- to contract
+- C-r ... have many other selection options
+#+BEGIN_SRC emacs-lisp
+  (use-package expand-region
+    :ensure t
+    :bind
+    (("C-=" . er/expand-region)
+     ("C--" . er/contract-region)
+     :map mode-specific-map
+     :prefix-map region-prefix-map
+     :prefix "r"
+     ("(" . er/mark-inside-pairs)
+     (")" . er/mark-outside-pairs)
+     ("'" . er/mark-inside-quotes)
+     ([34] . er/mark-outside-quotes) ; it's just a quotation mark
+     ("o" . er/mark-org-parent)
+     ("u" . er/mark-url)
+     ("b" . er/mark-org-code-block)
+     ("." . er/mark-method-call)
+     (">" . er/mark-next-accessor)
+     ("w" . er/mark-word)
+     ("d" . er/mark-defun)
+     ("e" . er/mark-email)
+     ("," . er/mark-symbol)
+     ("<" . er/mark-symbol-with-prefix)
+     (";" . er/mark-comment)
+     ("s" . er/mark-sentence)
+     ("S" . er/mark-text-sentence)
+     ("p" . er/mark-paragraph)
+     ("P" . er/mark-text-paragraph)))
+#+END_SRC
 
+Edit a selection seperately in a buffer
+#+BEGIN_SRC emacs-lisp
+  (use-package edit-indirect
+    :ensure t
+    :after expand-region
+    :bind
+    (:map region-prefix-map
+          ("r" . edit-indirect-region)))
+#+END_SRC
 * User Interface
 ** Localization
 #+BEGIN_SRC emacs-lisp
@@ -201,16 +256,6 @@ Disable gui elements we likely ever use
     (tooltip-mode -1))
 
 #+END_SRC
-** Theme
-Like the build in theme of wombat. Good vibrance of colours and not too dark.
- #+BEGIN_SRC emacs-lisp
-   (use-package darktooth-theme
-     :ensure t
-     :demand t
-     :config
-     (load-theme 'darktooth))
-   ;;(load-theme 'wombat)
- #+END_SRC
 
 ** Some fancy gadgets for graphics
  #+BEGIN_SRC emacs-lisp
@@ -270,20 +315,26 @@ The nicest out there at the moment is doom-modeline.
      (doom-modeline-buffer-file-name-style 'buffer-name)
      (doom-modeline-icon t))
  #+END_SRC
+** Theme
+Like the build in theme of wombat. Good vibrance of colours and not too dark.
+ #+BEGIN_SRC emacs-lisp
+   (load-theme 'wombat)
+ #+END_SRC
 
 ** Dashboard
 #+BEGIN_SRC emacs-lisp
   (use-package dashboard
     :ensure t
+    :diminish dashboard-mode
     :config
     (dashboard-setup-startup-hook)
     :custom
-    (initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
+    (initial-buffer-choice (lambda () (get-buffer-create "*dashboard*")))
     (dashboard-items '((recents  . 5)
                        (bookmarks . 5)
-                       (projects . 5)
-                       (agenda . 5)
-                       (registers . 5))))
+                    ;;   (projects . 5)
+                       (agenda . 5))))
+                    ;;   (registers . 5))))
 #+END_SRC
 
 * Help
@@ -316,7 +367,18 @@ Auto completion
     :config
     (global-company-mode 1))
 #+END_SRC
-
+** Helpful
+A much improved help system on the familiar key bindings
+#+BEGIN_SRC emacs-lisp
+  (use-package helpful
+    :ensure t
+    :bind
+    (("C-h f" . helpful-callable)
+     ("C-h v" . helpful-variable)
+     ("C-h k" . helpful-key)
+     ("C-h C" . helpful-command)
+     ("C-h F" . helpful-function)))
+#+END_SRC
 * Search, Narrow and Minibuffers
 Best combination of search and narrowing software is Ivy|Counsel and Swiper.
 It can do everything Helm can do, is however much smaller in footprint.
@@ -430,8 +492,123 @@ This call for version control using git. Magit is the tool to take advantage of 
     :hook (magit-mode  . hl-line-mode)
     :bind
     (("C-x g"  . magit-status)
-     ("C-x G"  . magit-status-with-prefix)))
+     ("C-x G"  . magit-status-with-prefix))
+    :bind
+    (:map mode-specific-map
+          :prefix-map magit-prefix-map
+          :prefix "m"
+          (("a" . magit-stage-file) ; the closest analog to git add
+           ("b" . magit-blame)
+           ("B" . magit-branch)
+           ("c" . magit-checkout)
+           ("C" . magit-commit)
+           ("d" . magit-diff)
+           ("D" . magit-discard)
+           ("f" . magit-fetch)
+           ("g" . vc-git-grep)
+           ("G" . magit-gitignore)
+           ("i" . magit-init)
+           ("l" . magit-log)
+           ("m" . magit)
+           ("M" . magit-merge)
+           ("n" . magit-notes-edit)
+           ("p" . magit-pull-branch)
+           ("P" . magit-push-current)
+           ("r" . magit-reset)
+           ("R" . magit-rebase)
+           ("s" . magit-status)
+           ("S" . magit-stash)
+           ("t" . magit-tag)
+           ("T" . magit-tag-delete)
+           ("u" . magit-unstage)
+           ("U" . magit-update-index))))
 #+END_SRC
+** IBuffer-vc 
+Provide the Git status of open buffers in a list
+#+BEGIN_SRC emacs-lisp
+  (use-package ibuffer-vc
+    :ensure t
+    :config
+    (define-ibuffer-column icon
+      (:name "Icon" :inline t)
+      (all-the-icons-ivy--icon-for-mode major-mode))
+    :custom
+    (ibuffer-formats
+     '((mark modified read-only vc-status-mini " "
+             (name 18 18 :left :elide)
+             " "
+             (size 9 -1 :right)
+             " "
+             (mode 16 16 :left :elide)
+             " "
+             filename-and-process)) "include vc status info")
+    :hook
+    (ibuffer . (lambda ()
+                 (ibuffer-vc-set-filter-groups-by-vc-root)
+                 (unless (eq ibuffer-sorting-mode 'alphabetic)
+                   (ibuffer-do-sort-by-alphabetic)))))
+#+END_SRC
+** Git modes
+#+BEGIN_SRC emacs-lisp
+  (use-package gitconfig-mode
+    :ensure t
+    :defer t)
+
+  (use-package gitignore-mode
+    :ensure t
+    :defer t)
+#+END_SRC
+** Diff-hl
+diff-hl-mode highlights uncommitted changes on the left side of the window, allows you to jump between and revert them selectively.
+#+BEGIN_SRC emacs-lisp
+  (use-package diff-hl
+    :ensure t
+    :hook
+    ((magit-post-refresh . diff-hl-post-refresh)
+     (prog-mode . diff-hl-mode)
+     (org-mode . diff-hl-mode)
+     (dired-mode . diff-hl-dired-mode)))
+#+END_SRC
+* Programming
+** General
+*** Paredit
+Ensure that parenthesis are always paired
+#+BEGIN_SRC emacs-lisp
+  (use-package paredit
+    :ensure t
+    :diminish paredit-mode
+    :commands (paredit-mode)
+    :hook ((lisp-mode emacs-lisp-mode) . paredit-mode))
+#+END_SRC
+*** Smart Commenting
+#+BEGIN_SRC emacs-lisp
+  (use-package smart-comment
+    :ensure t
+    :bind
+    ("M-;" . smart-comment))
+#+END_SRC
+*** Projectile
+Provides easy project management and navigation. The concept of a project is pretty basic - just a folder containing special file. Currently git, mercurial, darcs and bazaar repos are considered projects by default. So are lein, maven, sbt, scons, rebar and bundler projects. If you want to mark a folder manually as a project just create an empty .projectile file in it.
+#+BEGIN_SRC emacs-lisp
+  (use-package projectile
+    :ensure t
+    :bind
+    (:map mode-specific-map ("p" . projectile-command-map))
+    :custom
+    (projectile-project-root-files-functions
+     '(projectile-root-local
+       projectile-root-top-down
+       projectile-root-bottom-up
+       projectile-root-top-down-recurring))
+    (projectile-completion-system 'ivy))
+
+  (use-package counsel-projectile
+    :ensure t
+    :after counsel prokectile
+    :config
+    (counsel-projectile-mode))
+#+END_SRC
+** Elisp
 * The End
 ;;; # eval: (add-hook 'after-save-hook (lambda () (org-babel-tangle)(byte-compile-file "~/.emacs.d/init.el")) nil t)
 # Local Variables:

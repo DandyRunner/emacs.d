@@ -149,7 +149,6 @@ Customize to a sperate file
 #+BEGIN_SRC emacs-lisp
   (use-package cus-edit
     :custom
-    ;;(custom-file null-device "Don't store customizations"))
     (custom-file (expand-file-name ".custom.el" user-emacs-directory) "Store customizations in seperate file"))
 
   (when (file-exists-p custom-file)
@@ -332,9 +331,9 @@ Like the build in theme of wombat. Good vibrance of colours and not too dark.
     (initial-buffer-choice (lambda () (get-buffer-create "*dashboard*")))
     (dashboard-items '((recents  . 5)
                        (bookmarks . 5)
-                    ;;   (projects . 5)
-                       (agenda . 5))))
-                    ;;   (registers . 5))))
+                       (projects . 5)
+                       (agenda . 5)
+                       (registers . 5))))
 #+END_SRC
 
 * Help
@@ -365,7 +364,14 @@ Auto completion
                     (local-set-key (kbd "<tab>")
                                    #'company-indent-or-complete-common))))
     :config
-    (global-company-mode 1))
+    (global-company-mode 1)
+    (use-package company-quickhelp
+      :ensure t
+      :defer t
+      :custom
+      (company-quickhelp-delay 3)
+      :config
+      (company-quickhelp-mode 1)))
 #+END_SRC
 ** Helpful
 A much improved help system on the familiar key bindings
@@ -608,7 +614,72 @@ Provides easy project management and navigation. The concept of a project is pre
     :config
     (counsel-projectile-mode))
 #+END_SRC
-** Elisp
+*** Flycheck
+On-the-fly syntax checking
+#+BEGIN_SRC emacs-lisp
+  (use-package flycheck
+    :ensure t
+    :diminish flycheck-mode
+    :hook
+    (prog-mode . flycheck-mode))
+
+  (use-package avy-flycheck
+    :defer t
+    :config
+    (avy-flycheck-setup))
+#+END_SRC
+** Emacs Lisp
+#+BEGIN_SRC emacs-lisp
+
+  ;; Check if all parenthesis are in place after save
+  ;; Places the pointer on the faulty line. Invaluable.
+  (use-package lisp
+    :hook
+    (after-save . check-parens))
+
+  ;; Highlights defined Emacs Lisp symbols in source code.
+  ;; Currently it recognizes Lisp function, built-in function, macro, face and variable names.
+  (use-package highlight-defined
+    :ensure t
+    :custom
+    (highlight-defined-face-use-itself t)
+    :hook
+    (emacs-lisp-mode . highlight-defined-mode))
+
+  ;; Highlight of Lisp quotes and quoted symbols
+  (use-package highlight-quoted
+    :ensure t
+    :hook
+    (emacs-lisp-mode . highlight-quoted-mode))
+
+  ;; Evaluation Result OverlayS for Emacs Lisp.
+  (use-package eros
+    :ensure t
+    :hook
+    (emacs-lisp-mode . eros-mode))
+
+  ;;Discovering elisp functions based on examples
+  (use-package suggest
+    :ensure t
+    :defer t)
+
+  ;; Pretty symbols
+  (use-package ipretty
+    :ensure t
+    :config
+    (ipretty-mode 1))
+
+  ;; Elisp refactor
+  (use-package erefactor
+    :ensure t
+    :defer t)
+  ;; provides a flycheck checker for the metadata in Emacs Lisp files which are intended to be packages.
+  (use-package flycheck-package
+    :ensure t
+    :defer t
+    :after flycheck
+    (flycheck-package-setup))
+#+END_SRC
 * The End
 ;;; # eval: (add-hook 'after-save-hook (lambda () (org-babel-tangle)(byte-compile-file "~/.emacs.d/init.el")) nil t)
 # Local Variables:

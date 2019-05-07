@@ -116,7 +116,6 @@
 ;; [[file:~/.emacs.d/init.org::*Files][Files:3]]
 (use-package cus-edit
   :custom
-  ;;(custom-file null-device "Don't store customizations"))
   (custom-file (expand-file-name ".custom.el" user-emacs-directory) "Store customizations in seperate file"))
 
 (when (file-exists-p custom-file)
@@ -280,9 +279,9 @@
   (initial-buffer-choice (lambda () (get-buffer-create "*dashboard*")))
   (dashboard-items '((recents  . 5)
                      (bookmarks . 5)
-                  ;;   (projects . 5)
-                     (agenda . 5))))
-                  ;;   (registers . 5))))
+                     (projects . 5)
+                     (agenda . 5)
+                     (registers . 5))))
 ;; Dashboard:1 ends here
 
 ;; [[file:~/.emacs.d/init.org::*Which-key][Which-key:1]]
@@ -308,7 +307,14 @@
                   (local-set-key (kbd "<tab>")
                                  #'company-indent-or-complete-common))))
   :config
-  (global-company-mode 1))
+  (global-company-mode 1)
+  (use-package company-quickhelp
+    :ensure t
+    :defer t
+    :custom
+    (company-quickhelp-delay 3)
+    :config
+    (company-quickhelp-mode 1)))
 ;; Company mode:1 ends here
 
 ;; [[file:~/.emacs.d/init.org::*Helpful][Helpful:1]]
@@ -532,3 +538,67 @@
   :config
   (counsel-projectile-mode))
 ;; Projectile:1 ends here
+
+;; [[file:~/.emacs.d/init.org::*Flycheck][Flycheck:1]]
+(use-package flycheck
+  :ensure t
+  :diminish flycheck-mode
+  :hook
+  (prog-mode . flycheck-mode))
+
+(use-package avy-flycheck
+  :defer t
+  :config
+  (avy-flycheck-setup))
+;; Flycheck:1 ends here
+
+;; [[file:~/.emacs.d/init.org::*Emacs%20Lisp][Emacs Lisp:1]]
+;; Check if all parenthesis are in place after save
+;; Places the pointer on the faulty line. Invaluable.
+(use-package lisp
+  :hook
+  (after-save . check-parens))
+
+;; Highlights defined Emacs Lisp symbols in source code.
+;; Currently it recognizes Lisp function, built-in function, macro, face and variable names.
+(use-package highlight-defined
+  :ensure t
+  :custom
+  (highlight-defined-face-use-itself t)
+  :hook
+  (emacs-lisp-mode . highlight-defined-mode))
+
+;; Highlight of Lisp quotes and quoted symbols
+(use-package highlight-quoted
+  :ensure t
+  :hook
+  (emacs-lisp-mode . highlight-quoted-mode))
+
+;; Evaluation Result OverlayS for Emacs Lisp.
+(use-package eros
+  :ensure t
+  :hook
+  (emacs-lisp-mode . eros-mode))
+
+;;Discovering elisp functions based on examples
+(use-package suggest
+  :ensure t
+  :defer t)
+
+;; Pretty symbols
+(use-package ipretty
+  :ensure t
+  :config
+  (ipretty-mode 1))
+
+;; Elisp refactor
+(use-package erefactor
+  :ensure t
+  :defer t)
+;; provides a flycheck checker for the metadata in Emacs Lisp files which are intended to be packages.
+(use-package flycheck-package
+  :ensure t
+  :defer t
+  :after flycheck
+  (flycheck-package-setup))
+;; Emacs Lisp:1 ends here

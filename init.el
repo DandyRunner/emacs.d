@@ -1,12 +1,15 @@
-;; [[file:~/.emacs.d/init.org::*Package%20sources][Package sources:1]]
-(eval-when-compile
-  (require 'package)
-  (setq package-archives
-	`(("melpa"        . ,(concat "/home/ejansen/" ".elpa-mirror/melpa/"))
-	  ("org"          . ,(concat "/home/ejansen/" ".elpa-mirror/org/"))
-	  ("melba-stable" . ,(concat "/home/ejansen/" ".elpa-mirror/melpa-stable/"))
-	  ("gnu"          . ,(concat "/home/ejansen/" ".elpa-mirror/gnu/")))))
-;; Package sources:1 ends here
+;; [[file:~/.emacs.d/init.org::*Package%20Sources][Package Sources:1]]
+;; Increase the garbage collector memory to 500MB
+(setq gc-cons-threshold (* 500 1024 1024))
+(add-hook 'after-init-hook (lambda () (setq gc-cons-threshold (* 5 1024 1024))))
+
+(require 'package)
+(setq package-archives
+      `(("melpa"        . ,(concat "/home/ejansen/" ".elpa-mirror/melpa/"))
+        ("org"          . ,(concat "/home/ejansen/" ".elpa-mirror/org/"))
+        ("melba-stable" . ,(concat "/home/ejansen/" ".elpa-mirror/melpa-stable/"))
+        ("gnu"          . ,(concat "/home/ejansen/" ".elpa-mirror/gnu/"))))
+;; Package Sources:1 ends here
 
 ;; [[file:~/.emacs.d/init.org::*Use-package%20install][Use-package install:1]]
 (eval-when-compile
@@ -18,7 +21,9 @@
 (eval-when-compile
   (unless (package-installed-p 'use-package)
     (package-refresh-contents)
-    (package-install 'use-package)))
+    (package-install 'use-package)
+    (package-install 'diminish)
+    (package-install 'bind-key)))
 
 ;; Should set before loading `use-package'
 (eval-and-compile
@@ -30,7 +35,9 @@
 (eval-when-compile
   (setq use-package-verbose t)
   (setq use-package-minimum-reported-time 0.01)
-  (require 'use-package))
+  (require 'use-package)
+  (require 'diminish)
+  (require 'bind-key))
 ;; Use-package install:1 ends here
 
 ;; [[file:~/.emacs.d/init.org::*Use-package%20configuration][Use-package configuration:1]]
@@ -272,15 +279,16 @@
 ;; [[file:~/.emacs.d/init.org::*Dashboard][Dashboard:1]]
 (use-package dashboard
   :ensure t
+  :demand t
   :diminish dashboard-mode
   :config
   (dashboard-setup-startup-hook)
   :custom
-  (initial-buffer-choice (lambda () (get-buffer-create "*dashboard*")))
+  (dashboard-banner-logo-title "Welcome to EMacs Erwin")
   (dashboard-items '((recents  . 5)
+                     (agenda . 10)
                      (bookmarks . 5)
                      (projects . 5)
-                     (agenda . 5)
                      (registers . 5))))
 ;; Dashboard:1 ends here
 
@@ -498,9 +506,9 @@
 (use-package diff-hl
   :ensure t
   :hook
-  ((magit-post-refresh . diff-hl-post-refresh)
-   (prog-mode . diff-hl-mode)
-   (org-mode . diff-hl-mode)
+  ((magit-post-refresh-hook . diff-hl-post-refresh)
+   (prog-mode . diff-hl-margin-mode)
+   (org-mode . diff-hl-margin-mode)
    (dired-mode . diff-hl-dired-mode)))
 ;; Diff-hl:1 ends here
 
@@ -602,3 +610,34 @@
   :after flycheck
   (flycheck-package-setup))
 ;; Emacs Lisp:1 ends here
+
+;; [[file:~/.emacs.d/init.org::*Org%20Mode][Org Mode:1]]
+(use-package org
+  :ensure nil            ;org-plus-config
+  :custom
+  (org-src-tab-acts-natively t "Tabs work natively")
+  (org-startup-indented t "Headers and content are indented")
+  (org-pretty-entities t "Pretty symbols rather than non UTF-8 sysmbols")
+  (org-hide-emphasis-markers t "Hide the emphesis markers")
+  (org-log-done 'note "Record time annd note when task changes to done")
+  (org-todo-keywords '((sequence "TODO(t)" "ACTIVE(a)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)")))
+  (org-todo-keywordfaces '(("WAITING" . warning)))
+  :hook
+  (org-mode . (lambda () (visual-line-mode)))
+  :bind (("C-c a" . org-agenda)         ;Open org agenda
+         ("C-c b" . org-switchb))       ;Switch org buffer
+  :config
+  ;; More fancy UI
+  (use-package org-bullets
+    :ensure t
+    :if (char-displayable-p ?◉)
+    :hook (org-mode . org-bullets-mode))
+
+  (use-package org-fancy-priorities
+    :ensure t
+    :diminish
+    :defines org-fancy-priority-list
+    :hook (org-mode . org-fancy-priorities-mode)
+    :config (unless (char-displayable-p ?❗)
+                (setq org-fancy-priorities-list '("HIGH" "MID" "LOW" "OPTIONAL")))))
+;; Org Mode:1 ends here

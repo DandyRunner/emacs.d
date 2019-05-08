@@ -599,10 +599,6 @@
   :config
   (ipretty-mode 1))
 
-;; Elisp refactor
-(use-package erefactor
-  :ensure t
-  :defer t)
 ;; provides a flycheck checker for the metadata in Emacs Lisp files which are intended to be packages.
 (use-package flycheck-package
   :ensure t
@@ -610,34 +606,3 @@
   :after flycheck
   (flycheck-package-setup))
 ;; Emacs Lisp:1 ends here
-
-;; [[file:~/.emacs.d/init.org::*Org%20Mode][Org Mode:1]]
-(use-package org
-  :ensure nil            ;org-plus-config
-  :custom
-  (org-src-tab-acts-natively t "Tabs work natively")
-  (org-startup-indented t "Headers and content are indented")
-  (org-pretty-entities t "Pretty symbols rather than non UTF-8 sysmbols")
-  (org-hide-emphasis-markers t "Hide the emphesis markers")
-  (org-log-done 'note "Record time annd note when task changes to done")
-  (org-todo-keywords '((sequence "TODO(t)" "ACTIVE(a)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)")))
-  (org-todo-keywordfaces '(("WAITING" . warning)))
-  :hook
-  (org-mode . (lambda () (visual-line-mode)))
-  :bind (("C-c a" . org-agenda)         ;Open org agenda
-         ("C-c b" . org-switchb))       ;Switch org buffer
-  :config
-  ;; More fancy UI
-  (use-package org-bullets
-    :ensure t
-    :if (char-displayable-p ?◉)
-    :hook (org-mode . org-bullets-mode))
-
-  (use-package org-fancy-priorities
-    :ensure t
-    :diminish
-    :defines org-fancy-priority-list
-    :hook (org-mode . org-fancy-priorities-mode)
-    :config (unless (char-displayable-p ?❗)
-                (setq org-fancy-priorities-list '("HIGH" "MID" "LOW" "OPTIONAL")))))
-;; Org Mode:1 ends here

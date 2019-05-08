@@ -683,10 +683,6 @@ On-the-fly syntax checking
     :config
     (ipretty-mode 1))
 
-  ;; Elisp refactor
-  (use-package erefactor
-    :ensure t
-    :defer t)
   ;; provides a flycheck checker for the metadata in Emacs Lisp files which are intended to be packages.
   (use-package flycheck-package
     :ensure t
@@ -695,38 +691,51 @@ On-the-fly syntax checking
     (flycheck-package-setup))
 #+END_SRC
 * Applications
-** Organisation
+** COMMENT Organisation
 The main reason for using emacs - lets get organised - with everything
+Sample of nicer bullets [[http://nadeausoftware.com/articles/2007/11/latency_friendly_customized_bullets_using_unicode_characters][inspiration]]
 *** Org Mode
 #+BEGIN_SRC emacs-lisp
-(use-package org
-  :ensure nil            ;org-plus-config
-  :custom
-  (org-src-tab-acts-natively t "Tabs work natively")
-  (org-startup-indented t "Headers and content are indented")
-  (org-pretty-entities t "Pretty symbols rather than non UTF-8 sysmbols")
-  (org-hide-emphasis-markers t "Hide the emphesis markers")
-  (org-log-done 'note "Record time annd note when task changes to done")
-  (org-todo-keywords '((sequence "TODO(t)" "ACTIVE(a)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)")))
-  (org-todo-keywordfaces '(("WAITING" . warning)))
-  :hook
-  (org-mode . (lambda () (visual-line-mode)))
-  :bind (("C-c a" . org-agenda)         ;Open org agenda
-         ("C-c b" . org-switchb))       ;Switch org buffer
-  :config
-  ;; More fancy UI
-  (use-package org-bullets
-    :ensure t
-    :if (char-displayable-p ?◉)
-    :hook (org-mode . org-bullets-mode))
+  (use-package org
+    :ensure nil            ;org-plus-config
+    :custom
+    (org-directory "~/Org")
+    (org-agenda-files '(concat org-directory "/Tasks"))
+    (org-default-notes-file (concat org-directory "/notes.org"))
+    (org-src-tab-acts-natively t "Tabs work natively")
+    (org-startup-indented t "Headers and content are indented")
+    (org-pretty-entities t "Pretty symbols rather than non UTF-8 sysmbols")
+    (org-hide-emphasis-markers t "Hide the emphesis markers")
+    (org-log-done 'note "Record time annd note when task changes to done")
+    (org-todo-keywords '((sequence "TODO(t)" "ACTIVE(a)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)")))
+    (org-todo-keywordfaces '(("WAITING" . warning)))
+    :hook
+    (org-mode . (lambda () (visual-line-mode)))
+    (org-indent-mode . (lambda () (diminish 'org-indent-mode)))
+    :bind (("C-c o a" . org-agenda)       ;Open org agenda
+           ("C-c o b" . org-switchb)      ;Switch org buffer
+           ("C-c o c" . org-capture)      ;Org capture
+           ("C-c o l" . org-store-link)   ;Org store link
+           )
+    :config
 
-  (use-package org-fancy-priorities
-    :ensure t
-    :diminish
-    :defines org-fancy-priority-list
-    :hook (org-mode . org-fancy-priorities-mode)
-    :config (unless (char-displayable-p ?❗)
-                (setq org-fancy-priorities-list '("HIGH" "MID" "LOW" "OPTIONAL")))))
+    ;; More advanced bullet points
+    (use-package org-bullets
+      :ensure t
+      :custom
+      ;; define some nicer bullets
+      (org-bullets-bullet-list '("\x25A3" "\x2B1A" "\x25D9" "\x25D8"))
+      :if (char-displayable-p ?◉)
+      :hook (org-mode . org-bullets-mode))
+
+    ;; More advanced priority symbols
+    (use-package org-fancy-priorities
+      :ensure t
+      :diminish
+      :defines org-fancy-priority-list
+      :hook (org-mode . org-fancy-priorities-mode)
+      :config (unless (char-displayable-p ?❗)
+                  (setq org-fancy-priorities-list '("HIGH" "MID" "LOW" "OPTIONAL")))))
 #+END_SRC
 * The End
 # Local Variables:

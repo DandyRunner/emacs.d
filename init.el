@@ -27,8 +27,8 @@
 ;; Setup `use-package'
 (eval-when-compile
   (unless (package-installed-p 'use-package)
-    (package-refresh-contents)
     (package-install 'use-package)
+    (package-refresh-contents)
     (package-install 'diminish)
     (package-install 'bind-key)))
 
@@ -50,8 +50,8 @@
 ;; [[file:~/.emacs.d/init.org::*Use-package%20configuration][Use-package configuration:1]]
 (use-package system-packages
   :ensure t
-  :custom
-  (system-packages-noconfirm t))
+  :config
+  (setq system-packages-noconfirm t))
 
 (use-package use-package-ensure-system-package
   :ensure t)
@@ -70,14 +70,14 @@
   :init
   (put 'narrow-to-region 'disabled nil)
   (put 'downcase-region 'disabled nil)
-  :custom
-  (scroll-step 1)
-  (inhibit-startup-screen t "Don't show splash screen")
-  (use-dialog-box nil "Disable dialog boxes")
-  (x-gtk-use-system-tooltips nil)
-  (enable-recursive-minibuffers t "Allow minibuffer commands in the minibuffer")
-  (indent-tabs-mode nil "Spaces!")
-  (debug-on-quit nil))
+  :config
+  (setq scroll-step 1)
+  (setq inhibit-startup-screen t)
+  (setq use-dialog-box nil)
+  (setq x-gtk-use-system-tooltips nil)
+  (setq enable-recursive-minibuffers t)
+  (setq indent-tabs-mode nil)
+  (setq debug-on-quit nil))
 ;; Common:1 ends here
 
 ;; [[file:~/.emacs.d/init.org::*Other%20built%20in%20settings][Other built in settings:1]]
@@ -121,19 +121,18 @@
 
 ;; [[file:~/.emacs.d/init.org::*Files][Files:2]]
 (use-package recentf
-  :custom
-  (recentf-auto-cleanup 30)
   :config
+  (setq recentf-auto-cleanup 30)
   (run-with-idle-timer 30 t 'recentf-save-list))
 ;; Files:2 ends here
 
 ;; [[file:~/.emacs.d/init.org::*Files][Files:3]]
 (use-package cus-edit
-  :custom
-  (custom-file (expand-file-name ".custom.el" user-emacs-directory) "Store customizations in seperate file"))
+  :config
+  (setq custom-file (expand-file-name ".custom.el" user-emacs-directory))
 
-(when (file-exists-p custom-file)
-  (load custom-file))
+  (when (file-exists-p custom-file)
+    (load custom-file)))
 ;; Files:3 ends here
 
 ;; [[file:~/.emacs.d/init.org::*Elmacro][Elmacro:1]]
@@ -185,17 +184,16 @@
 ;; [[file:~/.emacs.d/init.org::*Localization][Localization:1]]
 (use-package mule
   :config
-  (prefer-coding-system 'utf-8)
-  (set-language-environment "UTF-8")
-  (set-terminal-coding-system 'utf-8))
+  (setq prefer-coding-system 'utf-8)
+  (setq set-language-environment "UTF-8")
+  (setq set-terminal-coding-system 'utf-8))
 ;; Localization:1 ends here
 
 ;; [[file:~/.emacs.d/init.org::*Fonts][Fonts:1]]
 (use-package faces
   :defer 0.1
-  :custom
-  (face-font-family-alternatives '(("Source Code Pro")))
   :config
+  (setq face-font-family-alternatives '(("Source Code Pro")))
   (set-face-attribute 'default
                       nil
                       :family (caar face-font-family-alternatives)
@@ -219,27 +217,22 @@
 
 (use-package tooltip
   :defer t
-  :custom
-  (tooltip-mode -1))
+  :config
+  (setq tooltip-mode -1))
 ;; GUI:1 ends here
 
 ;; [[file:~/.emacs.d/init.org::*Some%20fancy%20gadgets%20for%20graphics][Some fancy gadgets for graphics:1]]
 (use-package time
   :defer t
-  :custom
-  (display-time-default-load-average nil)
-  (display-time-24hr-format t)
   :config
-  (display-time-mode t))
+  (setq display-time-default-load-average nil)
+  (setq display-time-24hr-format t)
+  (setq display-time-mode t))
 
 (use-package fancy-battery
   :ensure t
   :hook
   (after-init . fancy-battery-mode))
-
-;;(use-package font-lock+
-;;  :quelpa
-;;  (font-lock+ :repo "emacsmirror/font-lock-plus" :fetcher github))
 
 (use-package all-the-icons
   :ensure t
@@ -262,9 +255,8 @@
 (use-package all-the-icons-ivy
   :ensure t
   :after ivy
-  :custom
-  (all-the-icons-ivy-buffer-commands '() "Don't use for buffers.")
   :config
+  (setq all-the-icons-ivy-buffer-commands '())
   (all-the-icons-ivy-setup))
 ;; Some fancy gadgets for graphics:1 ends here
 
@@ -273,10 +265,10 @@
   :ensure t
   :hook
   (after-init . doom-modeline-mode)
-  :custom
-  (doom-modeline-major-mode-icon t)
-  (doom-modeline-buffer-file-name-style 'buffer-name)
-  (doom-modeline-icon t))
+  :config
+  (setq doom-modeline-major-mode-icon t)
+  (setq doom-modeline-buffer-file-name-style 'buffer-name)
+  (setq doom-modeline-icon t))
 ;; Modeline:1 ends here
 
 ;; [[file:~/.emacs.d/init.org::*Theme][Theme:1]]
@@ -290,14 +282,12 @@
   :diminish dashboard-mode
   :config
   (dashboard-setup-startup-hook)
-  :custom
-  (dashboard-banner-logo-title "Welcome to EMacs Erwin")
-  (dashboard-startup-banner (expand-file-name "emacs.png" user-emacs-directory))
-  (dashboard-items '((recents  . 5)
-                     (agenda . 10)
-                     (bookmarks . 5)
-                     (projects . 5)
-                     (registers . 5))))
+  (setq dashboard-startup-banner (expand-file-name "emacs.png" user-emacs-directory))
+  (setq dashboard-items '((recents  . 5)
+                          (agenda . 10)
+                          (bookmarks . 5)
+                          (projects . 5)
+                          (registers . 5))))
 ;; Dashboard:1 ends here
 
 ;; [[file:~/.emacs.d/init.org::*Which-key][Which-key:1]]
@@ -327,9 +317,8 @@
   (use-package company-quickhelp
     :ensure t
     :defer t
-    :custom
-    (company-quickhelp-delay 3)
     :config
+    (setq company-quickhelp-delay 3)
     (company-quickhelp-mode 1)))
 ;; Company mode:1 ends here
 
@@ -348,15 +337,17 @@
 (use-package ivy
   :demand t
   :diminish ivy-mode
-  :custom
+  :config
   ;; Displays the current and total number in the collection in the prompt
-  (ivy-count-format "%d%d " "Show anzu-like counter")
-  (ivy-use-selectable-prompt t "Make the prompt line selectable")
-  (ivy-dynamic-exhibit-delay-ms 200)
-  (ivy-height 10)
+  (setq ivy-count-format "%d%d ")
+  (setq ivy-use-selectable-prompt t)
+  (setq ivy-dynamic-exhibit-delay-ms 200)
+  (setq ivy-height 10)
   ;;Add recent files and bookmarks to the ivy-switch-buffer
-  (ivy-use-virtual-buffers t)
-  (ivy-wrap t)
+  (setq ivy-use-virtual-buffers t)
+  (setq ivy-wrap t)
+  (ivy-mode 1)
+  (ivy-set-occur 'ivy-switch-buffer 'ivy-switch-buffer-occur)
   :custom-face
   (ivy-current-match ((t (:inherit 'hl-line))))
   :bind
@@ -373,10 +364,7 @@
         ("M-r"   . ivy-reverse-i-search))
   :bind
   (:map ivy-switch-buffer-map
-        ("C-k"   . ivy-switch-buffer-kill))
-  :config
-  (ivy-mode 1)
-  (ivy-set-occur 'ivy-switch-buffer 'ivy-switch-buffer-occur))
+        ("C-k"   . ivy-switch-buffer-kill)))
 ;; Ivy:1 ends here
 
 ;; [[file:~/.emacs.d/init.org::*Counsel][Counsel:1]]
@@ -438,6 +426,17 @@
        ("C-o" . swiper-from-isearch)))
 ;; Swiper:1 ends here
 
+;; [[file:~/.emacs.d/init.org::*Avy][Avy:1]]
+(use-package avy
+  :ensure t
+  :config
+  (avy-setup-default)
+  :bind
+  (("C-;"     . avy-goto-char-timer)
+   ("M-g M-g" . avy-goto-line)
+   ("M-s M-s" . avy-goto-word-1)))
+;; Avy:1 ends here
+
 ;; [[file:~/.emacs.d/init.org::*Magit][Magit:1]]
 (use-package magit
   :ensure t
@@ -483,16 +482,15 @@
   (define-ibuffer-column icon
     (:name "Icon" :inline t)
     (all-the-icons-ivy--icon-for-mode major-mode))
-  :custom
-  (ibuffer-formats
-   '((mark modified read-only vc-status-mini " "
-           (name 18 18 :left :elide)
-           " "
-           (size 9 -1 :right)
-           " "
-           (mode 16 16 :left :elide)
-           " "
-           filename-and-process)) "include vc status info")
+  (setq ibuffer-formats
+        '((mark modified read-only vc-status-mini " "
+                (name 18 18 :left :elide)
+                " "
+                (size 9 -1 :right)
+                " "
+                (mode 16 16 :left :elide)
+                " "
+                filename-and-process)) "include vc status info")
   :hook
   (ibuffer . (lambda ()
                (ibuffer-vc-set-filter-groups-by-vc-root)
@@ -540,13 +538,13 @@
   :ensure t
   :bind
   (:map mode-specific-map ("p" . projectile-command-map))
-  :custom
-  (projectile-project-root-files-functions
-   '(projectile-root-local
-     projectile-root-top-down
-     projectile-root-bottom-up
-     projectile-root-top-down-recurring))
-  (projectile-completion-system 'ivy))
+  :config
+  (setq projectile-project-root-files-functions
+        '(projectile-root-local
+          projectile-root-top-down
+          projectile-root-bottom-up
+          projectile-root-top-down-recurring))
+  (setq projectile-completion-system 'ivy))
 
 (use-package counsel-projectile
   :ensure t
@@ -579,8 +577,8 @@
 ;; Currently it recognizes Lisp function, built-in function, macro, face and variable names.
 (use-package highlight-defined
   :ensure t
-  :custom
-  (highlight-defined-face-use-itself t)
+  :config
+  (setq highlight-defined-face-use-itself t)
   :hook
   (emacs-lisp-mode . highlight-defined-mode))
 

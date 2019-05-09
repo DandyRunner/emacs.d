@@ -1,11 +1,10 @@
-
 #+PROPERTY: header-args :tangle "~/.emacs.d/init.el" :comments link
 Sources:
 - [[https://github.com/seagle0128/.emacs.d][Seagle0128]]
 
 * User and System Definitions
 ** Directories
-(file-name-as-directory dir) will return directory path dir with a trailing slash, adding one if necessary, and not otherwise.
+~ (file-name-as-directory dir) will return directory path dir with a trailing slash, adding one if necessary, and not otherwise.
  #+BEGIN_SRC emacs-lisp
    ;; Set the emacs directory
    (setq user-emacs-directory (file-name-directory user-init-file))
@@ -41,8 +40,8 @@ Further bump up the memory before garbage collection starts, to speed up loading
   ;; Setup `use-package'
   (eval-when-compile
     (unless (package-installed-p 'use-package)
-      (package-refresh-contents)
       (package-install 'use-package)
+      (package-refresh-contents)
       (package-install 'diminish)
       (package-install 'bind-key)))
 
@@ -66,8 +65,8 @@ Further bump up the memory before garbage collection starts, to speed up loading
 #+BEGIN_SRC emacs-lisp
   (use-package system-packages
     :ensure t
-    :custom
-    (system-packages-noconfirm t))
+    :config
+    (setq system-packages-noconfirm t))
 
   (use-package use-package-ensure-system-package
     :ensure t)
@@ -88,14 +87,14 @@ These have been defined in C code, so use -emacs- pseudo-package to set them
     :init
     (put 'narrow-to-region 'disabled nil)
     (put 'downcase-region 'disabled nil)
-    :custom
-    (scroll-step 1)
-    (inhibit-startup-screen t "Don't show splash screen")
-    (use-dialog-box nil "Disable dialog boxes")
-    (x-gtk-use-system-tooltips nil)
-    (enable-recursive-minibuffers t "Allow minibuffer commands in the minibuffer")
-    (indent-tabs-mode nil "Spaces!")
-    (debug-on-quit nil))
+    :config
+    (setq scroll-step 1)
+    (setq inhibit-startup-screen t)
+    (setq use-dialog-box nil)
+    (setq x-gtk-use-system-tooltips nil)
+    (setq enable-recursive-minibuffers t)
+    (setq indent-tabs-mode nil)
+    (setq debug-on-quit nil))
 #+END_SRC
 ** Other built in settings
 #+BEGIN_SRC emacs-lisp
@@ -136,47 +135,46 @@ These have been defined in C code, so use -emacs- pseudo-package to set them
     :diminish
     :hook prog-mode)
 #+END_SRC
-** TODO Files
+** Files
 Saving file
 Conflicts with magit. Confused about backup folder
 #+BEGIN_SRC emacs-lisp :tangle no
   (use-package files
     :hook
     (before-save . delete-trailing-whitespace)
-    :custom
-    (require-final-newline t)
+    :config
+    (setq require-final-newline t)
     ;; backup settings
-    (make-backup-files t)
-    (backup-by-copying t)
-    (backup-directory-alist
+    (setq make-backup-files t)
+    (setq backup-by-copying t)
+    (setq backup-directory-alist
      '(("." . ,(expand-file-name
                  (concat user-emacs-directory ".backups")))))
-    (delete-old-versions t)
-    (delete-by-moving-to-trash t)
-    (kept-new-version 5)
-    (kept-old-versions 2)
-    (auto-save-default t)
-    (auto-save-interval 200)
-    (version-control t))
+    (setq delete-old-versions t)
+    (setq delete-by-moving-to-trash t)
+    (setq kept-new-version 5)
+    (setq kept-old-versions 2)
+    (setq auto-save-default t)
+    (setq auto-save-interval 200)
+    (setq version-control t))
 #+END_SRC
 
-Recent files
+Keep track of files that have been opened and changed.
 #+BEGIN_SRC emacs-lisp
   (use-package recentf
-    :custom
-    (recentf-auto-cleanup 30)
     :config
+    (setq recentf-auto-cleanup 30)
     (run-with-idle-timer 30 t 'recentf-save-list))
 #+END_SRC
 
 Customize to a sperate file
 #+BEGIN_SRC emacs-lisp
   (use-package cus-edit
-    :custom
-    (custom-file (expand-file-name ".custom.el" user-emacs-directory) "Store customizations in seperate file"))
+    :config
+    (setq custom-file (expand-file-name ".custom.el" user-emacs-directory))
 
-  (when (file-exists-p custom-file)
-    (load custom-file))
+    (when (file-exists-p custom-file)
+      (load custom-file)))
 #+END_SRC
 * Global Tools
 ** Elmacro
@@ -238,18 +236,17 @@ Edit a selection seperately in a buffer
 #+BEGIN_SRC emacs-lisp
   (use-package mule
     :config
-    (prefer-coding-system 'utf-8)
-    (set-language-environment "UTF-8")
-    (set-terminal-coding-system 'utf-8))
+    (setq prefer-coding-system 'utf-8)
+    (setq set-language-environment "UTF-8")
+    (setq set-terminal-coding-system 'utf-8))
 #+END_SRC
 
 ** Fonts
 #+BEGIN_SRC emacs-lisp
   (use-package faces
     :defer 0.1
-    :custom
-    (face-font-family-alternatives '(("Source Code Pro")))
     :config
+    (setq face-font-family-alternatives '(("Source Code Pro")))
     (set-face-attribute 'default
                         nil
                         :family (caar face-font-family-alternatives)
@@ -275,8 +272,8 @@ Disable gui elements we likely ever use
 
   (use-package tooltip
     :defer t
-    :custom
-    (tooltip-mode -1))
+    :config
+    (setq tooltip-mode -1))
 
 #+END_SRC
 
@@ -284,20 +281,15 @@ Disable gui elements we likely ever use
  #+BEGIN_SRC emacs-lisp
    (use-package time
      :defer t
-     :custom
-     (display-time-default-load-average nil)
-     (display-time-24hr-format t)
      :config
-     (display-time-mode t))
+     (setq display-time-default-load-average nil)
+     (setq display-time-24hr-format t)
+     (setq display-time-mode t))
 
    (use-package fancy-battery
      :ensure t
      :hook
      (after-init . fancy-battery-mode))
-
-   ;;(use-package font-lock+
-   ;;  :quelpa
-   ;;  (font-lock+ :repo "emacsmirror/font-lock-plus" :fetcher github))
 
    (use-package all-the-icons
      :ensure t
@@ -320,9 +312,8 @@ Disable gui elements we likely ever use
    (use-package all-the-icons-ivy
      :ensure t
      :after ivy
-     :custom
-     (all-the-icons-ivy-buffer-commands '() "Don't use for buffers.")
      :config
+     (setq all-the-icons-ivy-buffer-commands '())
      (all-the-icons-ivy-setup))
  #+END_SRC
 
@@ -333,10 +324,10 @@ The nicest out there at the moment is doom-modeline.
      :ensure t
      :hook
      (after-init . doom-modeline-mode)
-     :custom
-     (doom-modeline-major-mode-icon t)
-     (doom-modeline-buffer-file-name-style 'buffer-name)
-     (doom-modeline-icon t))
+     :config
+     (setq doom-modeline-major-mode-icon t)
+     (setq doom-modeline-buffer-file-name-style 'buffer-name)
+     (setq doom-modeline-icon t))
  #+END_SRC
 ** Theme
 Like the build in theme of wombat. Good vibrance of colours and not too dark.
@@ -352,14 +343,12 @@ Like the build in theme of wombat. Good vibrance of colours and not too dark.
     :diminish dashboard-mode
     :config
     (dashboard-setup-startup-hook)
-    :custom
-    (dashboard-banner-logo-title "Welcome to EMacs Erwin")
-    (dashboard-startup-banner (expand-file-name "emacs.png" user-emacs-directory))
-    (dashboard-items '((recents  . 5)
-                       (agenda . 10)
-                       (bookmarks . 5)
-                       (projects . 5)
-                       (registers . 5))))
+    (setq dashboard-startup-banner (expand-file-name "emacs.png" user-emacs-directory))
+    (setq dashboard-items '((recents  . 5)
+                            (agenda . 10)
+                            (bookmarks . 5)
+                            (projects . 5)
+                            (registers . 5))))
 #+END_SRC
 
 * Help
@@ -394,9 +383,8 @@ Auto completion
     (use-package company-quickhelp
       :ensure t
       :defer t
-      :custom
-      (company-quickhelp-delay 3)
       :config
+      (setq company-quickhelp-delay 3)
       (company-quickhelp-mode 1)))
 #+END_SRC
 ** Helpful
@@ -411,7 +399,7 @@ A much improved help system on the familiar key bindings
      ("C-h C" . helpful-command)
      ("C-h F" . helpful-function)))
 #+END_SRC
-* Search, Narrow and Minibuffers
+* Search, Narrow and Jump
 Best combination of search and narrowing software is Ivy|Counsel and Swiper.
 It can do everything Helm can do, is however much smaller in footprint.
 ** Ivy
@@ -421,15 +409,17 @@ Ivy is a generic completion mechanism for Emacs.
   (use-package ivy
     :demand t
     :diminish ivy-mode
-    :custom
+    :config
     ;; Displays the current and total number in the collection in the prompt
-    (ivy-count-format "%d%d " "Show anzu-like counter")
-    (ivy-use-selectable-prompt t "Make the prompt line selectable")
-    (ivy-dynamic-exhibit-delay-ms 200)
-    (ivy-height 10)
+    (setq ivy-count-format "%d%d ")
+    (setq ivy-use-selectable-prompt t)
+    (setq ivy-dynamic-exhibit-delay-ms 200)
+    (setq ivy-height 10)
     ;;Add recent files and bookmarks to the ivy-switch-buffer
-    (ivy-use-virtual-buffers t)
-    (ivy-wrap t)
+    (setq ivy-use-virtual-buffers t)
+    (setq ivy-wrap t)
+    (ivy-mode 1)
+    (ivy-set-occur 'ivy-switch-buffer 'ivy-switch-buffer-occur)
     :custom-face
     (ivy-current-match ((t (:inherit 'hl-line))))
     :bind
@@ -446,10 +436,7 @@ Ivy is a generic completion mechanism for Emacs.
           ("M-r"   . ivy-reverse-i-search))
     :bind
     (:map ivy-switch-buffer-map
-          ("C-k"   . ivy-switch-buffer-kill))
-    :config
-    (ivy-mode 1)
-    (ivy-set-occur 'ivy-switch-buffer 'ivy-switch-buffer-occur))
+          ("C-k"   . ivy-switch-buffer-kill)))
 #+END_SRC
 
 ** Counsel
@@ -513,7 +500,18 @@ Find text in your buffer, but cleverly.
     (:map isearch-mode-map
          ("C-o" . swiper-from-isearch)))
 #+END_SRC
-
+** Avy
+Quickly jump to anything on the screen
+#+BEGIN_SRC emacs-lisp
+  (use-package avy
+    :ensure t
+    :config
+    (avy-setup-default)
+    :bind
+    (("C-;"     . avy-goto-char-timer)
+     ("M-g M-g" . avy-goto-line)
+     ("M-s M-s" . avy-goto-word-1)))
+#+END_SRC
 * Version control
 One of the main advantages of emacs is everything is text based.
 This call for version control using git. Magit is the tool to take advantage of both.
@@ -555,7 +553,7 @@ This call for version control using git. Magit is the tool to take advantage of 
            ("u" . magit-unstage)
            ("U" . magit-update-index))))
 #+END_SRC
-** IBuffer-vc 
+** IBuffer-vc
 Provide the Git status of open buffers in a list
 #+BEGIN_SRC emacs-lisp
   (use-package ibuffer-vc
@@ -564,16 +562,15 @@ Provide the Git status of open buffers in a list
     (define-ibuffer-column icon
       (:name "Icon" :inline t)
       (all-the-icons-ivy--icon-for-mode major-mode))
-    :custom
-    (ibuffer-formats
-     '((mark modified read-only vc-status-mini " "
-             (name 18 18 :left :elide)
-             " "
-             (size 9 -1 :right)
-             " "
-             (mode 16 16 :left :elide)
-             " "
-             filename-and-process)) "include vc status info")
+    (setq ibuffer-formats
+          '((mark modified read-only vc-status-mini " "
+                  (name 18 18 :left :elide)
+                  " "
+                  (size 9 -1 :right)
+                  " "
+                  (mode 16 16 :left :elide)
+                  " "
+                  filename-and-process)) "include vc status info")
     :hook
     (ibuffer . (lambda ()
                  (ibuffer-vc-set-filter-groups-by-vc-root)
@@ -626,13 +623,13 @@ Provides easy project management and navigation. The concept of a project is pre
     :ensure t
     :bind
     (:map mode-specific-map ("p" . projectile-command-map))
-    :custom
-    (projectile-project-root-files-functions
-     '(projectile-root-local
-       projectile-root-top-down
-       projectile-root-bottom-up
-       projectile-root-top-down-recurring))
-    (projectile-completion-system 'ivy))
+    :config
+    (setq projectile-project-root-files-functions
+          '(projectile-root-local
+            projectile-root-top-down
+            projectile-root-bottom-up
+            projectile-root-top-down-recurring))
+    (setq projectile-completion-system 'ivy))
 
   (use-package counsel-projectile
     :ensure t
@@ -667,8 +664,8 @@ On-the-fly syntax checking
   ;; Currently it recognizes Lisp function, built-in function, macro, face and variable names.
   (use-package highlight-defined
     :ensure t
-    :custom
-    (highlight-defined-face-use-itself t)
+    :config
+    (setq highlight-defined-face-use-itself t)
     :hook
     (emacs-lisp-mode . highlight-defined-mode))
 
@@ -710,20 +707,20 @@ Sample of nicer bullets [[http://nadeausoftware.com/articles/2007/11/latency_fri
 #+BEGIN_SRC emacs-lisp
   (use-package org
     :ensure nil            ;org-plus-config
-    :custom
+    :config
     ;; Set the Org main directory where org files are located
-    (org-directory "~/Org")
+    (setq org-directory "~/Org")
     ;; Set the list of files that form the agenda
-    (org-agenda-files (directory-files org-directory t directory-files-no-dot-files-regexp))
-    ;; 
+    (setq org-agenda-files (directory-files org-directory t directory-files-no-dot-files-regexp))
+    ;;
     ;;(org-default-notes-file (concat org-directory "/notes.org"))
-    (org-src-tab-acts-natively t "Tabs work natively")
-    (org-startup-indented t "Headers and content are indented")
-    (org-pretty-entities t "Pretty symbols rather than non UTF-8 sysmbols")
-    (org-hide-emphasis-markers t "Hide the emphesis markers")
-    (org-log-done 'note "Record time annd note when task changes to done")
-    (org-todo-keywords '((sequence "TODO(t)" "ACTIVE(a)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)")))
-    (org-todo-keywordfaces '(("WAITING" . warning)))
+    (setq org-src-tab-acts-natively t)
+    (setq org-startup-indented t)
+    (setq org-pretty-entities t)
+    (setq org-hide-emphasis-markers t)
+    (setq org-log-done 'note)
+    (setq org-todo-keywords '((sequence "TODO(t)" "ACTIVE(a)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)")))
+    (setq org-todo-keywordfaces '(("WAITING" . warning)))
     :hook
     (org-mode . (lambda () (visual-line-mode)))
     (org-indent-mode . (lambda () (diminish 'org-indent-mode)))
@@ -737,9 +734,8 @@ Sample of nicer bullets [[http://nadeausoftware.com/articles/2007/11/latency_fri
     ;; More advanced bullet points
     (use-package org-bullets
       :ensure t
-      :custom
-      ;; define some nicer bullets
-      (org-bullets-bullet-list '("\x25A3" "\x2B1A" "\x25D9" "\x25D8"))
+      :config
+      (setq org-bullets-bullet-list '("\x25A3" "\x2B1A" "\x25D9" "\x25D8"))
       :if (char-displayable-p ?◉)
       :hook (org-mode . org-bullets-mode))
 

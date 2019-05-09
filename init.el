@@ -1,3 +1,10 @@
+;; [[file:~/.emacs.d/init.org::*Directories][Directories:1]]
+;; Set the emacs directory
+(setq user-emacs-directory (file-name-directory user-init-file))
+;; Set the home directory
+(defvar user-home-directory (expand-file-name "~/"))
+;; Directories:1 ends here
+
 ;; [[file:~/.emacs.d/init.org::*Package%20Sources][Package Sources:1]]
 ;; Increase the garbage collector memory to 500MB
 (setq gc-cons-threshold (* 500 1024 1024))
@@ -5,10 +12,10 @@
 
 (require 'package)
 (setq package-archives
-      `(("melpa"        . ,(concat "/home/ejansen/" ".elpa-mirror/melpa/"))
-        ("org"          . ,(concat "/home/ejansen/" ".elpa-mirror/org/"))
-        ("melba-stable" . ,(concat "/home/ejansen/" ".elpa-mirror/melpa-stable/"))
-        ("gnu"          . ,(concat "/home/ejansen/" ".elpa-mirror/gnu/"))))
+      `(("melpa"        . ,(concat user-home-directory ".elpa-mirror/melpa/"))
+        ("org"          . ,(concat user-home-directory ".elpa-mirror/org/"))
+        ("melba-stable" . ,(concat user-home-directory ".elpa-mirror/melpa-stable/"))
+        ("gnu"          . ,(concat user-home-directory ".elpa-mirror/gnu/"))))
 ;; Package Sources:1 ends here
 
 ;; [[file:~/.emacs.d/init.org::*Use-package%20install][Use-package install:1]]
@@ -285,6 +292,7 @@
   (dashboard-setup-startup-hook)
   :custom
   (dashboard-banner-logo-title "Welcome to EMacs Erwin")
+  (dashboard-startup-banner (expand-file-name "emacs.png" user-emacs-directory))
   (dashboard-items '((recents  . 5)
                      (agenda . 10)
                      (bookmarks . 5)
@@ -606,3 +614,7 @@
   :after flycheck
   (flycheck-package-setup))
 ;; Emacs Lisp:1 ends here
+
+;; [[file:~/.emacs.d/init.org::*The%20End][The End:1]]
+(setq dashboard-banner-logo-title (concat "Welcome to Emacs: " user-full-name ". Startup time: " (emacs-init-time)))
+;; The End:1 ends here

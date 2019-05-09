@@ -181,6 +181,19 @@
         ("r" . edit-indirect-region)))
 ;; Expand Region:2 ends here
 
+;; [[file:~/.emacs.d/init.org::*Open%20links][Open links:1]]
+(use-package link-hint
+  :ensure t
+  :bind
+  (("C-c l o" . link-hint-open-link)
+   ("C-c l c" . link-hint-copy-link)
+   :map mode-specific-map
+   :prefix-map link-hint-keymap
+   :prefix "l"
+   ("o" . link-hint-open-link)
+   ("c" . link-hint-copy-link)))
+;; Open links:1 ends here
+
 ;; [[file:~/.emacs.d/init.org::*Localization][Localization:1]]
 (use-package mule
   :config
@@ -437,6 +450,26 @@
    ("M-s M-s" . avy-goto-word-1)))
 ;; Avy:1 ends here
 
+;; [[file:~/.emacs.d/init.org::*Avy-zap][Avy-zap:1]]
+(use-package avy-zap
+  :ensure t
+  :bind
+  ([remap zap-to-char] . avy-zap-to-char))
+;; Avy-zap:1 ends here
+
+;; [[file:~/.emacs.d/init.org::*Ace-window][Ace-window:1]]
+(use-package ace-window
+  :ensure t
+  :config
+  (setq aw-keys '(?a ?s ?d ?f ?h ?j ?k ?l))
+  (setq aw-scope 'frame)
+  :custom-face
+  (aw-leading-char-face ((t (:inherit error :bold t :height 1.5))))
+  (aw-mode-line-face ((t (:inherit-line-emphasis :bold t))))
+  :bind
+  ([remap other-window] . ace-window))
+;; Ace-window:1 ends here
+
 ;; [[file:~/.emacs.d/init.org::*Magit][Magit:1]]
 (use-package magit
   :ensure t
@@ -594,7 +627,7 @@
   :hook
   (emacs-lisp-mode . eros-mode))
 
-;;Discovering elisp functions based on examples
+;; Discovering elisp functions based on examples
 (use-package suggest
   :ensure t
   :defer t)
@@ -605,7 +638,7 @@
   :config
   (ipretty-mode 1))
 
-;; provides a flycheck checker for the metadata in Emacs Lisp files which are intended to be packages.
+;; Provides a flycheck checker for the metadata in Emacs Lisp files which are intended to be packages.
 (use-package flycheck-package
   :ensure t
   :defer t

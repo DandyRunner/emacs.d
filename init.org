@@ -231,6 +231,20 @@ Edit a selection seperately in a buffer
     (:map region-prefix-map
           ("r" . edit-indirect-region)))
 #+END_SRC
+** Open links
+TODO - how does it work
+#+BEGIN_SRC emacs-lisp
+  (use-package link-hint
+    :ensure t
+    :bind
+    (("C-c l o" . link-hint-open-link)
+     ("C-c l c" . link-hint-copy-link)
+     :map mode-specific-map
+     :prefix-map link-hint-keymap
+     :prefix "l"
+     ("o" . link-hint-open-link)
+     ("c" . link-hint-copy-link)))
+#+END_SRC
 * User Interface
 ** Localization
 #+BEGIN_SRC emacs-lisp
@@ -512,6 +526,30 @@ Quickly jump to anything on the screen
      ("M-g M-g" . avy-goto-line)
      ("M-s M-s" . avy-goto-word-1)))
 #+END_SRC
+** Avy-zap
+Delete anything from pointer to chararacter, using avy.
+Function mapped to M-z
+#+BEGIN_SRC emacs-lisp
+  (use-package avy-zap
+    :ensure t
+    :bind
+    ([remap zap-to-char] . avy-zap-to-char))
+#+END_SRC
+** Ace-window
+Window switching made easy.
+ Mapped to the default C-x o (other window)
+#+BEGIN_SRC emacs-lisp
+  (use-package ace-window
+    :ensure t
+    :config
+    (setq aw-keys '(?a ?s ?d ?f ?h ?j ?k ?l))
+    (setq aw-scope 'frame)
+    :custom-face
+    (aw-leading-char-face ((t (:inherit error :bold t :height 1.5))))
+    (aw-mode-line-face ((t (:inherit-line-emphasis :bold t))))
+    :bind
+    ([remap other-window] . ace-window))
+#+END_SRC
 * Version control
 One of the main advantages of emacs is everything is text based.
 This call for version control using git. Magit is the tool to take advantage of both.
@@ -681,7 +719,7 @@ On-the-fly syntax checking
     :hook
     (emacs-lisp-mode . eros-mode))
 
-  ;;Discovering elisp functions based on examples
+  ;; Discovering elisp functions based on examples
   (use-package suggest
     :ensure t
     :defer t)
@@ -692,7 +730,7 @@ On-the-fly syntax checking
     :config
     (ipretty-mode 1))
 
-  ;; provides a flycheck checker for the metadata in Emacs Lisp files which are intended to be packages.
+  ;; Provides a flycheck checker for the metadata in Emacs Lisp files which are intended to be packages.
   (use-package flycheck-package
     :ensure t
     :defer t

@@ -646,6 +646,54 @@
   (flycheck-package-setup))
 ;; Emacs Lisp:1 ends here
 
+;; [[file:~/.emacs.d/init.org::*Org%20Mode][Org Mode:1]]
+(use-package org
+:ensure t            ;org-plus-config
+  :config
+  ;; Set the Org main directory where org files are located
+  (setq org-directory "~/Org")
+  ;; Set the list of files that form the agenda
+  (setq org-agenda-files '("~/Org"))
+  ;; Set the file that received the captures 
+  (setq org-default-notes-file (expand-file-name "/Notes.org" org-directory))
+  (setq org-src-tab-acts-natively t)
+  (setq org-startup-indented t)
+  (setq org-pretty-entities t)
+  (setq org-hide-emphasis-markers t)
+  (setq org-log-done 'note)
+  (setq org-todo-keywords '((sequence "TODO(t)" "ACTIVE(a)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)")))
+  (setq org-todo-keywordfaces '(("WAITING" . warning)))
+  :hook
+  (org-mode . (lambda () (visual-line-mode)))
+  (org-indent-mode . (lambda () (diminish 'org-indent-mode)))
+  :bind (("C-c o a" . org-agenda)       ;Open org agenda
+         ("C-c o b" . org-switchb)      ;Switch org buffer
+         ("C-c o c" . org-capture)      ;Org capture
+         ("C-c o l" . org-store-link)   ;Org store link
+         ))
+;; Org Mode:1 ends here
+
+;; [[file:~/.emacs.d/init.org::*Pretty%20header%20bullets][Pretty header bullets:1]]
+;; More advanced bullet points
+  (use-package org-bullets
+    :ensure t
+    :config
+    (setq org-bullets-bullet-list '("\x25A3" "\x2B1A" "\x25D9" "\x25D8"))
+    :if (char-displayable-p ?◉)
+    :hook (org-mode . org-bullets-mode))
+;; Pretty header bullets:1 ends here
+
+;; [[file:~/.emacs.d/init.org::*Pretty%20priorities][Pretty priorities:1]]
+;; More advanced priority symbols
+(use-package org-fancy-priorities
+  :ensure t
+  :diminish
+  :defines org-fancy-priority-list
+  :hook (org-mode . org-fancy-priorities-mode)
+  :config (unless (char-displayable-p ?❗)
+              (setq org-fancy-priorities-list '("HIGH" "MID" "LOW" "OPTIONAL"))))
+;; Pretty priorities:1 ends here
+
 ;; [[file:~/.emacs.d/init.org::*The%20End][The End:1]]
 (setq dashboard-banner-logo-title (concat "Welcome to Emacs: " user-full-name ". Startup time: " (emacs-init-time)))
 ;; The End:1 ends here

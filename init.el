@@ -384,6 +384,8 @@
 (use-package counsel
   :ensure t
   :bind
+  ("M-x" . counsel-M-x)
+  :bind
   (([remap menu-bar-open] . counsel-tmm)
    ([remap insert-char] . counsel-unicode-char)
    ([remap isearch-forward] . counsel-grep-or-swiper)
@@ -648,21 +650,32 @@
 
 ;; [[file:~/.emacs.d/init.org::*Org%20Mode][Org Mode:1]]
 (use-package org
-:ensure t            ;org-plus-config
+  :ensure t            ;org-plus-config
   :config
   ;; Set the Org main directory where org files are located
   (setq org-directory "~/Org")
   ;; Set the list of files that form the agenda
   (setq org-agenda-files '("~/Org"))
-  ;; Set the file that received the captures 
+  ;; Set the file that received the captures
   (setq org-default-notes-file (expand-file-name "/Notes.org" org-directory))
   (setq org-src-tab-acts-natively t)
   (setq org-startup-indented t)
   (setq org-pretty-entities t)
   (setq org-hide-emphasis-markers t)
   (setq org-log-done 'note)
-  (setq org-todo-keywords '((sequence "TODO(t)" "ACTIVE(a)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)")))
-  (setq org-todo-keywordfaces '(("WAITING" . warning)))
+  (setq org-log-into-drawer t)
+  ;; @  - records a note and time when entering
+  ;; !  - record a time when entering
+  ;; /! - record a time when leaving
+  (setq org-todo-keywords '((sequence "TODO(t)" "ACTIVE(a!)" "WAITING(w@/!)" "|" "DONE(d@/!)" "CANCELLED(c@/!)")))
+  (setq org-todo-keyword-faces '(("WAITING" . warning)))
+
+  (defun org-summary-todo (n-done n-not-done)
+  "Switch entry to DONE when all subentries are done, to TODO otherwise."
+  (let (org-log-done org-log-states)   ; turn off logging
+    (org-todo (if (= n-not-done 0) "DONE" "TODO"))))
+  (add-hook 'org-after-todo-statistics-hook 'org-summary-todo)
+
   :hook
   (org-mode . (lambda () (visual-line-mode)))
   (org-indent-mode . (lambda () (diminish 'org-indent-mode)))
@@ -693,6 +706,23 @@
   :config (unless (char-displayable-p ?❗)
               (setq org-fancy-priorities-list '("HIGH" "MID" "LOW" "OPTIONAL"))))
 ;; Pretty priorities:1 ends here
+
+;; [[file:~/.emacs.d/init.org::*Org%20Brain%20Mode][Org Brain Mode:1]]
+(use-package org-brain
+    :ensure t
+    :init
+;;    (setq org-brain-path org-directory)
+    :config
+;;    (setq org-id-track-globally t)
+;;    (setq org-id-locations-file (expand-file-name "/.org-id-locations" org-directory))
+;;    (push '("b" "Brain" plain (function org-brain-goto-end)
+;;           "* %i%?" :empty-lines 1)
+;;         org-capture-templates)
+    (setq org-brain-visualize-default-choices 'all)
+    (setq org-brain-title-max-length 12)
+    (setq org-brain-show-resources t)
+    (setq org-brain-show-text t))
+;; Org Brain Mode:1 ends here
 
 ;; [[file:~/.emacs.d/init.org::*The%20End][The End:1]]
 (setq dashboard-banner-logo-title (concat "Welcome to Emacs: " user-full-name ". Startup time: " (emacs-init-time)))
